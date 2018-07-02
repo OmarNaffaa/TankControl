@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <ToggleButton
+        android:id="@+id/motorToggle"
+        android:layout_width="0dp"
+        android:layout_height="80dp"
+        android:layout_marginBottom="5dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp"
+        android:checked="false"
+        android:fontFamily="@font/eczar_medium"
+        android:text="ToggleButton"
+        android:textAllCaps="false"
+        android:textColor="@drawable/toggle_color"
+        android:textOff="Motor Off"
+        android:textOn="Motor On"
+        android:textSize="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/valveToggle"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ToggleButton
+        android:id="@+id/valveToggle"
+        android:layout_width="0dp"
+        android:layout_height="80dp"
+        android:layout_marginBottom="5dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp"
+        android:checked="false"
+        android:fontFamily="@font/eczar_medium"
+        android:text="ToggleButton"
+        android:textAllCaps="false"
+        android:textColor="@drawable/toggle_color"
+        android:textOff="Valve Off"
+        android:textOn="Valve On"
+        android:textSize="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/motorToggle" />
+
+    <!-- Temperature Sensor Cards -->
+    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/temp_card_view"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="15dp"
+        card_view:cardBackgroundColor="@color/cardBackground"
+        card_view:cardCornerRadius="0dp"
+        card_view:cardElevation="5.0dp"
+        card_view:layout_constraintBottom_toTopOf="@+id/temp_card_data"
+        card_view:layout_constraintEnd_toStartOf="@+id/conductivity_card_view"
+        card_view:layout_constraintHorizontal_chainStyle="spread_inside"
+        card_view:layout_constraintStart_toStartOf="parent"
+        card_view:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/temp_title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/roboto_slab_bold"
+            android:gravity="center"
+            android:text="@string/temp"
+            android:textColor="@color/cardText"
+            android:textSize="20sp"
+            tools:text="@string/temp" />
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/temp_card_data"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp"
+        card_view:cardBackgroundColor="@color/dataCardBackground"
+        card_view:cardCornerRadius="0dp"
+        card_view:layout_constraintBottom_toTopOf="@+id/flowRate_card_view"
+        card_view:layout_constraintEnd_toStartOf="@+id/cond_card_data"
+        card_view:layout_constraintHorizontal_chainStyle="spread_inside"
+        card_view:layout_constraintStart_toStartOf="parent"
+        card_view:layout_constraintTop_toBottomOf="@+id/temp_card_view">
+
+        <TextView
+            android:id="@+id/temp_val"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/eczar_medium"
+            android:gravity="center"
+            android:text="@string/gettingDataText"
+            android:textColor="@color/colorAccent"
+            android:textSize="28dp"
+            tools:text="@string/gettingDataText" />
+    </android.support.v7.widget.CardView>
+
+    <!-- Conductivity Sensor Cards -->
+    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/conductivity_card_view"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="15dp"
+        card_view:cardBackgroundColor="@color/cardBackground"
+        card_view:cardCornerRadius="0dp"
+        card_view:cardElevation="5.0dp"
+        card_view:layout_constraintBottom_toTopOf="@+id/cond_card_data"
+        card_view:layout_constraintEnd_toEndOf="parent"
+        card_view:layout_constraintStart_toEndOf="@+id/temp_card_view"
+        card_view:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/cond_title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/roboto_slab_bold"
+            android:gravity="center"
+            android:text="@string/conductivity"
+            android:textColor="@color/cardText"
+            android:textSize="20sp"
+            tools:text="@string/conductivity" />
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/cond_card_data"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp"
+        card_view:cardBackgroundColor="@color/dataCardBackground"
+        card_view:cardCornerRadius="0dp"
+        card_view:layout_constraintBottom_toTopOf="@+id/value4_card_view"
+        card_view:layout_constraintEnd_toEndOf="parent"
+        card_view:layout_constraintStart_toEndOf="@+id/temp_card_data"
+        card_view:layout_constraintTop_toBottomOf="@+id/conductivity_card_view">
+
+        <TextView
+            android:id="@+id/cond_val"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/eczar_medium"
+            android:gravity="center"
+            android:text="@string/gettingDataText"
+            android:textColor="@color/colorAccent"
+            android:textSize="28dp"
+            tools:text="@string/gettingDataText" />
+    </android.support.v7.widget.CardView>
+
+    <!-- Flow Rate Sensor Cards -->
+    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/flowRate_card_view"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        card_view:cardBackgroundColor="@color/cardBackground"
+        card_view:cardCornerRadius="0dp"
+        card_view:cardElevation="5.0dp"
+        card_view:layout_constraintBottom_toTopOf="@+id/value4_card_data"
+        card_view:layout_constraintEnd_toStartOf="@+id/value4_card_view"
+        card_view:layout_constraintStart_toStartOf="parent"
+        card_view:layout_constraintTop_toBottomOf="@+id/temp_card_data">
+
+        <TextView
+            android:id="@+id/pressure_title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/roboto_slab_bold"
+            android:gravity="center"
+            android:text="@string/pressure"
+            android:textColor="@color/cardText"
+            android:textSize="20sp"
+            tools:text="@string/pressure" />
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/flowRate_card_data"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp"
+        app:cardBackgroundColor="@color/dataCardBackground"
+        app:cardCornerRadius="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/value6_card_data"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/value4_card_data"
+        app:layout_constraintTop_toBottomOf="@+id/value4_card_view">
+
+        <TextView
+            android:id="@+id/flow_val"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/eczar_medium"
+            android:gravity="center"
+            android:text="@string/gettingDataText"
+            android:textColor="@color/colorAccent"
+            android:textSize="28dp"
+            tools:text="@string/gettingDataText" />
+    </android.support.v7.widget.CardView>
+
+    <!-- Value4 Sensor Cards -->
+    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/value4_card_view"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        card_view:cardBackgroundColor="@color/cardBackground"
+        card_view:cardCornerRadius="0dp"
+        card_view:cardElevation="5.0dp"
+        card_view:layout_constraintBottom_toTopOf="@+id/flowRate_card_data"
+        card_view:layout_constraintEnd_toEndOf="parent"
+        card_view:layout_constraintStart_toEndOf="@+id/flowRate_card_view"
+        card_view:layout_constraintTop_toBottomOf="@+id/cond_card_data">
+
+        <TextView
+            android:id="@+id/flow_title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/roboto_slab_bold"
+            android:gravity="center"
+            android:text="@string/flowRate"
+            android:textColor="@color/cardText"
+            android:textSize="20sp"
+            tools:text="@string/flowRate" />
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/value4_card_data"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp"
+        app:cardBackgroundColor="@color/dataCardBackground"
+        app:cardCornerRadius="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/value5_card_data"
+        app:layout_constraintEnd_toStartOf="@+id/flowRate_card_data"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/flowRate_card_view">
+
+        <TextView
+            android:id="@+id/pressure_val"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/eczar_medium"
+            android:gravity="center"
+            android:text="@string/gettingDataText"
+            android:textColor="@color/colorAccent"
+            android:textSize="28dp"
+            tools:text="@string/gettingDataText" />
+    </android.support.v7.widget.CardView>
+
+    <!-- Value5 Sensor Cards -->
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/value5_card_data"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="170dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginStart="10dp"
+        app:cardBackgroundColor="@color/dataCardBackground"
+        app:cardCornerRadius="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/value6_card_data"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/motorState"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/eczar_medium"
+            android:gravity="center"
+            android:text="5"
+            android:textColor="@color/colorAccent"
+            android:textSize="30dp"
+            tools:text="5" />
+    </android.support.v7.widget.CardView>
+
+    <!-- Value6 Sensor Cards -->
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/value6_card_data"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="165dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="5dp"
+        app:cardBackgroundColor="@color/dataCardBackground"
+        app:cardCornerRadius="0dp"
+        app:layout_constraintBottom_toBottomOf="@+id/valveToggle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/value5_card_data">
+
+        <TextView
+            android:id="@+id/valveState"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/eczar_medium"
+            android:gravity="center"
+            android:text="6"
+            android:textColor="@color/colorAccent"
+            android:textSize="30dp"
+            tools:text="6" />
+    </android.support.v7.widget.CardView>
+
+    <!-- Water Level Sensor Cards -->
+    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/water_level_card_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="105dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        card_view:cardBackgroundColor="@color/cardBackground"
+        card_view:cardCornerRadius="0dp"
+        card_view:cardElevation="5.0dp"
+        card_view:layout_constraintBottom_toBottomOf="parent"
+        card_view:layout_constraintEnd_toStartOf="@+id/water_level_card_data"
+        card_view:layout_constraintHorizontal_bias="0.166"
+        card_view:layout_constraintStart_toStartOf="parent"
+        card_view:layout_constraintTop_toBottomOf="@+id/value5_card_data">
+
+        <TextView
+            android:id="@+id/water_level_txt"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/roboto_slab_bold"
+            android:gravity="center"
+            android:text="Water Level"
+            android:textColor="@color/cardText"
+            android:textSize="20sp"
+            tools:text="Water Level" />
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/water_level_card_data"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="100dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="10dp"
+        app:cardBackgroundColor="@color/dataCardBackground"
+        app:cardCornerRadius="0dp"
+        app:layout_constraintBottom_toBottomOf="@+id/valveToggle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/water_level_card_view"
+        app:layout_constraintTop_toBottomOf="@+id/value6_card_data">
+
+        <TextView
+            android:id="@+id/water_level_value"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/eczar_medium"
+            android:gravity="center"
+            android:text="@string/gettingDataText"
+            android:textColor="@color/colorAccent"
+            android:textSize="26dp"
+            tools:text="@string/gettingDataText" />
+    </android.support.v7.widget.CardView>
+</android.support.constraint.ConstraintLayout>

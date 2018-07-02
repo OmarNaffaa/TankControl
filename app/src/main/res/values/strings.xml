@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Tank Control</string>
+    <string name="temp">Temperature</string>
+    <string name="pressure">Pressure</string>
+    <string name="flowRate">Flow Rate</string>
+    <string name="conductivity">Conductivity</string>
+    <string name="welcomePicture">Welcome picture</string>
+    <string name="gettingDataText">Getting Data</string>
+</resources>
