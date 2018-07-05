@@ -9,4 +9,6 @@
     <string name="welcomePicture">Welcome picture</string>
     <string name="gettingDataText">Loading Data</string>
     <string name="viewData">View Details</string>
+    <string name="voltage">Voltage</string>
+    <string name="current">Current</string>
 </resources>
