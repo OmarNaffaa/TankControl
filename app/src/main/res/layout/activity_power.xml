@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".PowerActivity">
+
+    <!-- Voltage Card -->
+    <android.support.v7.widget.CardView
+        android:id="@+id/voltage_card_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        app:cardBackgroundColor="@color/cardBackground"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="10.0dp"
+        app:layout_constraintBottom_toTopOf="@+id/current_card_view"
+        app:layout_constraintEnd_toStartOf="@+id/voltage_card_data"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/voltage_card_view"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            app:cardBackgroundColor="@color/cardBackground"
+            app:cardCornerRadius="0dp"
+            app:cardElevation="10.0dp"
+            app:layout_constraintEnd_toStartOf="@+id/voltage_card_data"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/voltage_title"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/roboto_slab_bold"
+                android:gravity="center"
+                android:text="@string/voltage"
+                android:textColor="@color/cardText"
+                android:textSize="20sp"
+                tools:text="@string/voltage" />
+        </android.support.v7.widget.CardView>
+
+        <TextView
+            android:id="@+id/voltage_title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/roboto_slab_bold"
+            android:gravity="center"
+            android:text="@string/voltage"
+            android:textColor="@color/cardText"
+            android:textSize="20sp"
+            tools:text="@string/voltage" />
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/voltage_card_data"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="20dp"
+        app:cardBackgroundColor="@color/dataCardBackground"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="5.0dp"
+        app:layout_constraintBottom_toTopOf="@+id/current_card_data"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/voltage_card_view"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/voltage_level_value"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/eczar_medium"
+            android:gravity="center"
+            android:text="@string/gettingDataText"
+            android:textColor="@color/colorAccent"
+            android:textSize="24sp"
+            tools:text="@string/gettingDataText" />
+    </android.support.v7.widget.CardView>
+
+    <!-- Current Card -->
+    <android.support.v7.widget.CardView
+        android:id="@+id/current_card_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="430dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        app:cardBackgroundColor="@color/cardBackground"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="10.0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/current_card_data"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/voltage_card_view">
+
+        <TextView
+            android:id="@+id/current_title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/roboto_slab_bold"
+            android:gravity="center"
+            android:text="@string/current"
+            android:textColor="@color/cardText"
+            android:textSize="20sp"
+            tools:text="@string/current" />
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/current_card_data"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="430dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="10dp"
+        card_view:cardBackgroundColor="@color/dataCardBackground"
+        card_view:cardCornerRadius="0dp"
+        card_view:cardElevation="5.0dp"
+        card_view:layout_constraintBottom_toBottomOf="parent"
+        card_view:layout_constraintEnd_toEndOf="parent"
+        card_view:layout_constraintStart_toEndOf="@+id/current_card_view"
+        card_view:layout_constraintTop_toBottomOf="@+id/voltage_card_data">
+
+        <TextView
+            android:id="@+id/current_val"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/eczar_medium"
+            android:gravity="center"
+            android:text="@string/gettingDataText"
+            android:textColor="@color/colorAccent"
+            android:textSize="24sp"
+            tools:text="@string/gettingDataText" />
+    </android.support.v7.widget.CardView>
+
+</android.support.constraint.ConstraintLayout>
