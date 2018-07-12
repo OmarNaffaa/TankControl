@@ -24,6 +24,8 @@ public class MainActivity extends AppCompatActivity {
         Button powerButton = findViewById(R.id.powerButton);
     }
 
+    // event listener for this method is controlled by the powerButton
+    // in the XML sheet
     public void PowerDetails(View v){
         Intent intent = new Intent(MainActivity.this, PowerActivity.class);
         startActivity(intent);
