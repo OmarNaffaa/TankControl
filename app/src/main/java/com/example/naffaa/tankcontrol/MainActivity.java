@@ -24,6 +24,11 @@ public class MainActivity extends AppCompatActivity {
         Button powerButton = findViewById(R.id.powerButton);
     }
 
+    // Receives the data from ThingSpeak and displays it on the appropriate
+    // textbox
+
+
+
     // event listener for this method is controlled by the powerButton
     // in the XML sheet
     public void PowerDetails(View v){
