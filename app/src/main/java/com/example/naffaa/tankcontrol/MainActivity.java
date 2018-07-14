@@ -81,8 +81,9 @@ public class MainActivity extends AppCompatActivity {
 
                             // Handles null values
                             for(int i = 0; i < arraySize; i++){
-                                if(values[i] == "null"){
+                                if(values[i] == "null") {
                                     values[i] = "No Value";
+                                }
                             }
 
                             // set the field to the appropriate textbox
