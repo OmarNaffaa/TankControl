@@ -5,6 +5,7 @@ import android.content.pm.ActivityInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
+import android.system.ErrnoException;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -69,25 +70,39 @@ public class MainActivity extends AppCompatActivity {
                             // gets each field from ThingSpeak
                             String[] values = new String[arraySize];
 
-                            String zero = inner.getString("field1"); // temperature
-                            String one = inner.getString("field2"); // conductivity
-                            //String three = inner.getString("field3"); // flow rate
-                            //String four = inner.getString("field4"); // pressure
-                            //String five = inner.getString("field5"); // water level
-                            //String six = inner.getString("field6"); // power
-
-                            values[0] = zero;
-                            values[1] = one;
+                            values[0] = inner.getString("field1") + " \u00b0C"; // temperature
+                            values[1] = inner.getString("field2") + " S"; // conductivity
+                            values[2] = inner.getString("field3") + " m^3 / s"; // flow rate
+                            values[3] = inner.getString("field4") + " Pa"; // pressure
+                            values[4] = inner.getString("field5") + " cm"; // water level
+                            values[5] = inner.getString("field6") + " A"; // current
+                            values[6] = inner.getString("field7") + " V"; // voltage
 
                             // Handles null values
+                            CharSequence nullValue = "null";
                             for(int i = 0; i < arraySize; i++){
-                                if(values[i] == "null") {
-                                    values[i] = "No Value";
+                                if(values[i].contains(nullValue)) {
+                                    values[i] = "No Data Found";
                                 }
                             }
 
+                            // calculates power based on current and voltage from ThingSpeak
+                            String pwr = null;
+                            try{
+                                int a = Integer.parseInt(values[5]);
+                                int b = Integer.parseInt(values[6]);
+                                pwr = Integer.toString(a * b);
+                            } catch(Exception e){
+                                pwr = "No Data Found";
+                            }
+
                             // set the field to the appropriate textbox
-                            tempTxt.setText(values[1]);
+                            tempTxt.setText(values[0]);
+                            condTxt.setText(values[1]);
+                            flowTxt.setText(values[2]);
+                            pressureTxt.setText(values[3]);
+                            waterTxt.setText(values[4]);
+                            powerTxt.setText(pwr);
 
                         }
                         catch (JSONException e)
