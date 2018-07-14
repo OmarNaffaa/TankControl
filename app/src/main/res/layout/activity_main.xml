@@ -276,7 +276,8 @@
     </android.support.v7.widget.CardView>
 
     <!-- Water Level Sensor Cards -->
-    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+
+    <android.support.v7.widget.CardView
         android:id="@+id/water_level_card_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -284,14 +285,14 @@
         android:layout_marginBottom="10dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="10dp"
-        card_view:cardBackgroundColor="@color/cardBackground"
-        card_view:cardCornerRadius="0dp"
-        card_view:cardElevation="10.0dp"
-        card_view:layout_constraintBottom_toTopOf="@+id/power_card_top_view"
-        card_view:layout_constraintEnd_toStartOf="@+id/voltage_card_data"
-        card_view:layout_constraintHorizontal_bias="0.166"
-        card_view:layout_constraintStart_toStartOf="parent"
-        card_view:layout_constraintTop_toBottomOf="@+id/pressure_card_view">
+        app:cardBackgroundColor="@color/cardBackground"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="10.0dp"
+        app:layout_constraintBottom_toTopOf="@+id/power_card_top_view"
+        app:layout_constraintEnd_toStartOf="@+id/voltage_card_data"
+        app:layout_constraintHorizontal_bias="0.166"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/pressure_card_view">
 
         <TextView
             android:id="@+id/water_level_txt"
@@ -322,7 +323,7 @@
         app:layout_constraintTop_toBottomOf="@+id/pressure_card_data">
 
         <TextView
-            android:id="@+id/water_level_value"
+            android:id="@+id/water_level_val"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fontFamily="@font/eczar_medium"
@@ -405,7 +406,7 @@
         app:layout_constraintTop_toBottomOf="@+id/voltage_card_data">
 
         <TextView
-            android:id="@+id/power_txt"
+            android:id="@+id/power_val"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fontFamily="@font/eczar_medium"

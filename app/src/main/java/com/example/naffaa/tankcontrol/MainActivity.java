@@ -25,17 +25,26 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        TextView temp = findViewById(R.id.temp_val);
-        getData(temp);
+        // Data textboxes on the interface
+        TextView temp = findViewById(R.id.temp_val);           // temperature value
+        TextView conduct = findViewById(R.id.cond_val);        // conductivity value
+        TextView flow = findViewById(R.id.flow_val);           // flow rate value
+        TextView press = findViewById(R.id.pressure_val);      // pressure value
+        TextView level = findViewById(R.id.water_level_val);   // water level value
+        TextView power = findViewById(R.id.power_val);         // power value
 
+        // Buttons on the interface
         ToggleButton toggleMotor = findViewById(R.id.motorToggle);
         ToggleButton toggleValve = findViewById(R.id.valveToggle);
         Button powerButton = findViewById(R.id.powerButton);
+
+        getData(temp, conduct, flow, press, level, power);
     }
 
     // Receives the data from ThingSpeak and displays it on the appropriate
@@ -43,31 +52,49 @@ public class MainActivity extends AppCompatActivity {
     String server_url =
             "https://api.thingspeak.com/channels/525549/feeds.json?api_key=7I4UJ8MNLR8I0LWS&results=1";
 
-    private void getData(final TextView temperature) {
+    final int arraySize = 7;
+
+    private void getData(final TextView tempTxt, final TextView condTxt, final TextView flowTxt,
+                         final TextView pressureTxt, final TextView waterTxt, final TextView powerTxt) {
 
         JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.GET, server_url, (JSONObject) null,
-        new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try
-                {
-                    JSONArray outer = response.getJSONArray("feeds");
-                    JSONObject inner = outer.getJSONObject(0);
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try
+                        {
+                            JSONArray outer = response.getJSONArray("feeds");
+                            JSONObject inner = outer.getJSONObject(0);
 
-                    // gets each field from ThingSpeak
-                    String temp = inner.getString("field2");
-                    String pow = inner.getString("field1");
+                            // gets each field from ThingSpeak
+                            String[] values = new String[arraySize];
 
-                    // set the field to the appropriate textbox
-                    temperature.setText(temp + " V");
+                            String zero = inner.getString("field1"); // temperature
+                            String one = inner.getString("field2"); // conductivity
+                            //String three = inner.getString("field3"); // flow rate
+                            //String four = inner.getString("field4"); // pressure
+                            //String five = inner.getString("field5"); // water level
+                            //String six = inner.getString("field6"); // power
 
-                }
-                catch (JSONException e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener(){
+                            values[0] = zero;
+                            values[1] = one;
+
+                            // Handles null values
+                            for(int i = 0; i < arraySize; i++){
+                                if(values[i] == "null"){
+                                    values[i] = "No Value";
+                            }
+
+                            // set the field to the appropriate textbox
+                            tempTxt.setText(values[1]);
+
+                        }
+                        catch (JSONException e)
+                        {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener(){
             @Override
             public void onErrorResponse(VolleyError error){
 
