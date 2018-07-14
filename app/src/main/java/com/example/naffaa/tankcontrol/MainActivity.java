@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
                             // Handles null values
                             CharSequence nullValue = "null";
                             for(int i = 0; i < arraySize; i++){
-                                if(values[i].contains(nullValue)) {
+                                if(values[i].contains(nullValue )) {
                                     values[i] = "No Data Found";
                                 }
                             }
