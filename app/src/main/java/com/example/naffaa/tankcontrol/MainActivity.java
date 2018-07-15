@@ -2,6 +2,7 @@ package com.example.naffaa.tankcontrol;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -32,31 +33,29 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().hide();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        // Data textboxes on the interface
-        TextView temp = findViewById(R.id.temp_val);           // temperature value
-        TextView conduct = findViewById(R.id.cond_val);        // conductivity value
-        TextView flow = findViewById(R.id.flow_val);           // flow rate value
-        TextView press = findViewById(R.id.pressure_val);      // pressure value
-        TextView level = findViewById(R.id.water_level_val);   // water level value
-        TextView power = findViewById(R.id.power_val);         // power value
-
         // Buttons on the interface
         ToggleButton toggleMotor = findViewById(R.id.motorToggle);
         ToggleButton toggleValve = findViewById(R.id.valveToggle);
         Button powerButton = findViewById(R.id.powerButton);
 
-        getData(temp, conduct, flow, press, level, power);
+        getData();
     }
 
     // Receives the data from ThingSpeak and displays it on the appropriate
     // textbox
     String server_url =
             "https://api.thingspeak.com/channels/525549/feeds.json?api_key=7I4UJ8MNLR8I0LWS&results=1";
-
     final int arraySize = 7;
 
-    private void getData(final TextView tempTxt, final TextView condTxt, final TextView flowTxt,
-                         final TextView pressureTxt, final TextView waterTxt, final TextView powerTxt) {
+    private void getData(){
+
+        // Data textboxes on the interface
+        final TextView tempTxt = findViewById(R.id.temp_val);           // temperature value
+        final TextView condTxt = findViewById(R.id.cond_val);           // conductivity value
+        final TextView flowTxt = findViewById(R.id.flow_val);           // flow rate value
+        final TextView pressureTxt = findViewById(R.id.pressure_val);   // pressure value
+        final TextView waterTxt = findViewById(R.id.water_level_val);   // water level value
+        final TextView powerTxt = findViewById(R.id.power_val);         // power value
 
         JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.GET, server_url, (JSONObject) null,
                 new Response.Listener<JSONObject>() {
@@ -71,23 +70,23 @@ public class MainActivity extends AppCompatActivity {
                             String[] values = new String[arraySize];
 
                             values[0] = inner.getString("field1") + " \u00b0C"; // temperature
-                            values[1] = inner.getString("field2") + " S"; // conductivity
+                            values[1] = inner.getString("field2") + " S";       // conductivity
                             values[2] = inner.getString("field3") + " m^3 / s"; // flow rate
-                            values[3] = inner.getString("field4") + " Pa"; // pressure
-                            values[4] = inner.getString("field5") + " cm"; // water level
-                            values[5] = inner.getString("field6") + " A"; // current
-                            values[6] = inner.getString("field7") + " V"; // voltage
+                            values[3] = inner.getString("field4") + " Pa";      // pressure
+                            values[4] = inner.getString("field5") + " cm";      // water level
+                            values[5] = inner.getString("field6") + " A";       // current
+                            values[6] = inner.getString("field7") + " V";       // voltage
 
                             // Handles null values
                             CharSequence nullValue = "null";
                             for(int i = 0; i < arraySize; i++){
-                                if(values[i].contains(nullValue )) {
+                                if(values[i].contains(nullValue)) {
                                     values[i] = "No Data Found";
                                 }
                             }
 
                             // calculates power based on current and voltage from ThingSpeak
-                            String pwr = null;
+                            String pwr = "";
                             try{
                                 int a = Integer.parseInt(values[5]);
                                 int b = Integer.parseInt(values[6]);
@@ -121,6 +120,31 @@ public class MainActivity extends AppCompatActivity {
 
         MySingleton.getInstance(MainActivity.this).addToRequestQueue(objectRequest);
 
+    }
+
+    // refreshes the data every 5 seconds when the activity is showing
+    Handler h = new Handler();
+    Runnable r;
+    int delay = 1000 * 5; // 15 second delay
+
+    @Override
+    protected void onResume(){ // when the activity is active refresh every 5 seconds
+
+        h.postDelayed(r = new Runnable() {
+            @Override
+            public void run() {
+                getData();
+                h.postDelayed(r, delay);
+            }
+        }, delay);
+
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause(){ // if the activity isn't active stop calling getData
+        h.removeCallbacks(r);
+        super.onPause();
     }
 
     // event listener for this method is controlled by the powerButton

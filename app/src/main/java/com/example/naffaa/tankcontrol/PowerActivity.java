@@ -1,6 +1,7 @@
 package com.example.naffaa.tankcontrol;
 
 import android.content.pm.ActivityInfo;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
@@ -24,16 +25,16 @@ public class PowerActivity extends AppCompatActivity {
         getSupportActionBar().hide();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        TextView current = findViewById(R.id.current_val);
-        TextView voltage = findViewById(R.id.voltage_val);
-
-        getPower(current, voltage);
+        getPower();
     }
 
     String server_url =
             "https://api.thingspeak.com/channels/525549/feeds.json?api_key=7I4UJ8MNLR8I0LWS&results=1";
 
-    private void getPower(final TextView currentTxt, final TextView voltageTxt) {
+    private void getPower() {
+
+        final TextView currentTxt = findViewById(R.id.current_val);
+        final TextView voltageTxt = findViewById(R.id.voltage_val);
 
         JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.GET, server_url, (JSONObject) null,
                 new Response.Listener<JSONObject>() {
@@ -75,5 +76,30 @@ public class PowerActivity extends AppCompatActivity {
 
         MySingleton.getInstance(PowerActivity.this).addToRequestQueue(objectRequest);
 
+    }
+
+    // refreshes the data when the activity is active every 5 seconds
+    Handler h = new Handler();
+    Runnable r;
+    int delay = 1000 * 5; // 15 second delay
+
+    @Override
+    protected void onResume(){ // when the activity is active refresh every 5 seconds
+
+        h.postDelayed(r = new Runnable() {
+            @Override
+            public void run() {
+                getPower();
+                h.postDelayed(r, delay);
+            }
+        }, delay);
+
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause(){ // if the activity isn't active stop calling getData
+        h.removeCallbacks(r);
+        super.onPause();
     }
 }
