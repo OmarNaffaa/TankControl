@@ -29,7 +29,7 @@ public class PowerActivity extends AppCompatActivity {
     }
 
     String server_url =
-            "https://api.thingspeak.com/channels/525549/feeds.json?api_key=7I4UJ8MNLR8I0LWS&results=1";
+            "https://api.thingspeak.com/channels/544573/feeds.json?api_key=NBS23605E6LNZNMS&results=1";
 
     private void getPower() {
 
@@ -45,10 +45,13 @@ public class PowerActivity extends AppCompatActivity {
                             JSONArray outer = response.getJSONArray("feeds");
                             JSONObject inner = outer.getJSONObject(0);
 
-                            String currentValue = inner.getString("field6") + " A";
-                            String voltageValue = inner.getString("field7") + " V";
+                            String currentValue = inner.getString("field6") + " ";
+                            String voltageValue = inner.getString("field7") + " ";
 
-                            CharSequence nullValue = "null";
+                            currentValue = currentValue.substring(0,5) + " A";
+                            voltageValue = voltageValue.substring(0,5) + " V";
+
+                            CharSequence nullValue = "null ";
 
                             if(currentValue.contains(nullValue)){
                                 currentValue = "No Data Found";
@@ -81,10 +84,10 @@ public class PowerActivity extends AppCompatActivity {
     // refreshes the data when the activity is active every 5 seconds
     Handler h = new Handler();
     Runnable r;
-    int delay = 1000 * 5; // 15 second delay
+    int delay = 1000 * 5; // time delay
 
     @Override
-    protected void onResume(){ // when the activity is active refresh every 5 seconds
+    protected void onResume(){ // when the activity is active refresh every x seconds
 
         h.postDelayed(r = new Runnable() {
             @Override

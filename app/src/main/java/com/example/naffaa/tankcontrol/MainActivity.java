@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     // Receives the data from ThingSpeak and displays it on the appropriate
     // textbox
     String server_url =
-            "https://api.thingspeak.com/channels/525549/feeds.json?api_key=7I4UJ8MNLR8I0LWS&results=1";
+            "https://api.thingspeak.com/channels/544573/feeds.json?api_key=NBS23605E6LNZNMS&results=1";
     final int arraySize = 7;
 
     private void getData(){
@@ -69,16 +69,28 @@ public class MainActivity extends AppCompatActivity {
                             // gets each field from ThingSpeak
                             String[] values = new String[arraySize];
 
-                            values[0] = inner.getString("field1") + " \u00b0C"; // temperature
-                            values[1] = inner.getString("field2") + " S";       // conductivity
-                            values[2] = inner.getString("field3") + " m^3 / s"; // flow rate
-                            values[3] = inner.getString("field4") + " Pa";      // pressure
-                            values[4] = inner.getString("field5") + " cm";      // water level
-                            values[5] = inner.getString("field6") + " A";       // current
-                            values[6] = inner.getString("field7") + " V";       // voltage
+                            values[0] = inner.getString("field1") + " "; // temperature
+                            values[1] = inner.getString("field2") + " "; // conductivity
+                            values[2] = inner.getString("field3") + " "; // flow rate
+                            values[3] = inner.getString("field4") + " "; // pressure
+                            values[4] = inner.getString("field5") + " "; // water level
+                            values[5] = inner.getString("field6") + " "; // current
+                            values[6] = inner.getString("field7") + " "; // voltage
+
+                            // format the string and add units
+                            values[0] = values[0].substring(0,5) + " \u00b0C";
+                            values[1] = values[1].substring(0,5) + " S";
+                            values[2] = values[2].substring(0,5) + " cm^3 / s";
+                            values[3] = values[3].substring(0,5) + " kPa";
+                            values[4] = values[4].substring(0,5) + " cm";
+
+                            // current and voltage are used for power calculation,
+                            // no units added to avoid parse error
+                            values[5] = values[5].substring(0,5);
+                            values[6] = values[6].substring(0,5);
 
                             // Handles null values
-                            CharSequence nullValue = "null";
+                            CharSequence nullValue = "null  ";
                             for(int i = 0; i < arraySize; i++){
                                 if(values[i].contains(nullValue)) {
                                     values[i] = "No Data Found";
@@ -86,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                             // calculates power based on current and voltage from ThingSpeak
-                            String pwr = "";
+                            String pwr;
                             try{
                                 int a = Integer.parseInt(values[5]);
                                 int b = Integer.parseInt(values[6]);
