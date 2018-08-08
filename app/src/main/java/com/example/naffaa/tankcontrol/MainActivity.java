@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error){
 
-                Toast.makeText(MainActivity.this, "Something went wrong", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Connection Error", Toast.LENGTH_SHORT).show();
 
             }
         });

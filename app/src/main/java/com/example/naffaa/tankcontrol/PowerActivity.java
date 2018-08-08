@@ -72,7 +72,7 @@ public class PowerActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error){
 
-                Toast.makeText(PowerActivity.this, "Something went wrong", Toast.LENGTH_SHORT).show();
+                Toast.makeText(PowerActivity.this, "Connection Error", Toast.LENGTH_SHORT).show();
 
             }
         });
