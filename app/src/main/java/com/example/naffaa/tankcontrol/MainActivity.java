@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         // Buttons on the interface
         ToggleButton toggleMotor = findViewById(R.id.motorToggle);
         ToggleButton toggleValve = findViewById(R.id.valveToggle);
-        Button powerButton = findViewById(R.id.powerButton);
+        Button detailButton = findViewById(R.id.detailButton);
 
         getData();
     }
@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     // textbox
     String server_url =
             "https://api.thingspeak.com/channels/544573/feeds.json?api_key=NBS23605E6LNZNMS&results=1";
-    final int arraySize = 7;
+    final int arraySize = 8;
 
     private void getData(){
 
@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         final TextView condTxt = findViewById(R.id.cond_val);           // conductivity value
         final TextView flowTxt = findViewById(R.id.flow_val);           // flow rate value
         final TextView pressureTxt = findViewById(R.id.pressure_val);   // pressure value
-        final TextView waterTxt = findViewById(R.id.water_level_val);   // water level value
+        final TextView waterTxt = findViewById(R.id.water_level_val); // water level value
         final TextView powerTxt = findViewById(R.id.power_val);         // power value
 
         JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.GET, server_url, (JSONObject) null,
@@ -67,27 +67,29 @@ public class MainActivity extends AppCompatActivity {
                             JSONObject inner = outer.getJSONObject(0);
 
                             // gets each field from ThingSpeak
-                            String[] values = new String[arraySize];
+                            String[] values = new String[arraySize]; // TODO: Calculate remaining space
 
                             values[0] = inner.getString("field1") + " "; // temperature
                             values[1] = inner.getString("field2") + " "; // conductivity
                             values[2] = inner.getString("field3") + " "; // flow rate
-                            values[3] = inner.getString("field4") + " "; // pressure
-                            values[4] = inner.getString("field5") + " "; // water level
+                            values[3] = inner.getString("field4") + " "; // Tank 1 Water Level
+                            values[4] = inner.getString("field5") + " "; // Tank 2 Water Level
                             values[5] = inner.getString("field6") + " "; // current
                             values[6] = inner.getString("field7") + " "; // voltage
+                            values[7] = inner.getString("field8") + " "; // pressure
 
                             // format the string and add units
                             values[0] = values[0].substring(0,5) + " \u00b0C";
                             values[1] = values[1].substring(0,5) + " S";
                             values[2] = values[2].substring(0,5) + " cm^3 / s";
-                            values[3] = values[3].substring(0,5) + " kPa";
+                            values[3] = values[3].substring(0,5) + " cm";
                             values[4] = values[4].substring(0,5) + " cm";
+                            values[7] = values[7].substring(0,5) + " kPa";
 
                             // current and voltage are used for power calculation,
                             // no units added to avoid parse error
-                            values[5] = values[5].substring(0,5);
-                            values[6] = values[6].substring(0,5);
+                            values[5] = values[4].substring(0,5);
+                            values[6] = values[5].substring(0,5);
 
                             // Handles null values
                             CharSequence nullValue = "null  ";
@@ -111,8 +113,8 @@ public class MainActivity extends AppCompatActivity {
                             tempTxt.setText(values[0]);
                             condTxt.setText(values[1]);
                             flowTxt.setText(values[2]);
-                            pressureTxt.setText(values[3]);
                             waterTxt.setText(values[4]);
+                            pressureTxt.setText(values[7]);
                             powerTxt.setText(pwr);
 
                         }
@@ -161,9 +163,8 @@ public class MainActivity extends AppCompatActivity {
 
     // event listener for this method is controlled by the powerButton
     // in the XML sheet
-    public void PowerDetails(View v){
-        Intent intent = new Intent(MainActivity.this, PowerActivity.class);
+    public void Details(View v) {
+        Intent intent = new Intent(MainActivity.this, MoreDetails.class);
         startActivity(intent);
     }
-
 }

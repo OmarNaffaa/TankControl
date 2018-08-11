@@ -4,11 +4,16 @@
     <string name="pressure">Pressure</string>
     <string name="flowRate">Flow Rate</string>
     <string name="conductivity">Conductivity</string>
-    <string name="powerTop">Power</string>
-    <string name="powerBottom">Consumption</string>
+    <string name="power">Power Usage</string>
+    <string name="powerDetails">Power Information</string>
+    <string name="moreInfo">More Details</string>
     <string name="welcomePicture">Welcome picture</string>
     <string name="gettingDataText">Loading Data</string>
     <string name="viewData">View Details</string>
     <string name="voltage">Voltage</string>
     <string name="current">Current</string>
+    <string name="firstTank">Tank 1</string>
+    <string name="secondTank">Tank 2</string>
+    <string name="additionalInfo">Water Level Information</string>
+    <string name="maxHeight">Height of Tank</string>
 </resources>
