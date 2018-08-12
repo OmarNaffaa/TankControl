@@ -23,15 +23,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
+import java.text.DecimalFormat;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         // Buttons on the interface
         ToggleButton toggleMotor = findViewById(R.id.motorToggle);
@@ -69,43 +71,47 @@ public class MainActivity extends AppCompatActivity {
                             // gets each field from ThingSpeak (unitless data is used for calculations)
                             String[] values = new String[arraySize];
 
-                            values[0] = inner.getString("field1") + " \u00b0c"; // temperature
-                            values[1] = inner.getString("field2") + " S"; // conductivity
-                            values[2] = inner.getString("field3") + " cm^3 / s"; // flow rate
+                            values[0] = inner.getString("field1"); // temperature
+                            values[1] = inner.getString("field2"); // conductivity
+                            values[2] = inner.getString("field3"); // flow rate
                             values[3] = inner.getString("field4"); // Tank 1 Water Level
                             values[4] = inner.getString("field5"); // Tank 2 Water Level
                             values[5] = inner.getString("field6"); // current
                             values[6] = inner.getString("field7"); // voltage
-                            values[7] = inner.getString("field8") + " kPa"; // pressure
+                            values[7] = inner.getString("field8"); // pressure
 
                             // Handles null values
+                            double[] parsedVal = new double[arraySize];
+                            String[] formattedValues = new String[arraySize];
+                            DecimalFormat decimalFormat = new DecimalFormat("0.00");
+
                             for(int i = 0; i < arraySize; i++){
                                 if(values[i].contains("null")) {
-                                    values[i] = "No Data Found";
+                                    formattedValues[i] = "No Data Found";
+                                } else {
+                                    parsedVal[i] = Double.parseDouble(values[i]);
+                                    formattedValues[i] = decimalFormat.format(parsedVal[i]);
+
+                                    if(i == 0){ formattedValues[i] += " \u00b0C"; } // adds units conditionally
+                                    if(i == 1){ formattedValues[i] += " S"; }
+                                    if(i == 2){ formattedValues[i] += " cm^3 / s"; }
+                                    if(i == 7){ formattedValues[i] += " kPa"; }
                                 }
                             }
 
-                            String noData = "No Data Found";
+                            String pwr, spaceLeft;
 
                             // calculates power based on current and voltage from ThingSpeak
-                            String pwr = noData;
-                            if(values[5] != noData && values[6] != noData)
-                            {
-                                pwr = CalculatePower(values[5], values[6]);
-                            }
+                            pwr = CalculatePower(values[5], values[6]);
 
                             // calculates remaining space of the system
-                            String spaceLeft = noData;
-                            if(values[3] != noData && values[4] != noData)
-                            {
-                                spaceLeft = CalculateSpaceRemaining(values[3], values[4]);
-                            }
+                            spaceLeft = CalculateSpaceRemaining(values[3], values[4]);
 
                             // set the field to the appropriate textbox
-                            tempTxt.setText(values[0]);
-                            condTxt.setText(values[1]);
-                            flowTxt.setText(values[2]);
-                            pressureTxt.setText(values[7]);
+                            tempTxt.setText(formattedValues[0]);
+                            condTxt.setText(formattedValues[1]);
+                            flowTxt.setText(formattedValues[2]);
+                            pressureTxt.setText(formattedValues[7]);
                             capUsed.setText(spaceLeft);
                             powerTxt.setText(pwr);
 
@@ -133,15 +139,25 @@ public class MainActivity extends AppCompatActivity {
         double amntOfSpace;
         double tankHeight = 100; // adjust based on actual tank height
 
-        double tankOne = Double.parseDouble(t1);
-        double tankTwo = Double.parseDouble(t2);
+        try{
 
-        double tankOnePcnt = (tankOne / tankHeight) * 100;
-        double tankTwoPcnt = (tankTwo / tankHeight) * 100;
+            double tankOne = Double.parseDouble(t1);
+            double tankTwo = Double.parseDouble(t2);
 
-        amntOfSpace = (tankOnePcnt + tankTwoPcnt) / 2;
+            double tankOnePcnt = (tankOne / tankHeight) * 100;
+            double tankTwoPcnt = (tankTwo / tankHeight) * 100;
 
-        return Math.round(amntOfSpace) + "% full";
+            amntOfSpace = (tankOnePcnt + tankTwoPcnt) / 2;
+
+            DecimalFormat decimalFormat = new DecimalFormat("0.00");
+
+            return decimalFormat.format(amntOfSpace) + "% filled";
+
+        } catch(Exception e){
+
+            return "No Data Found";
+
+        }
 
     }
 
@@ -149,11 +165,21 @@ public class MainActivity extends AppCompatActivity {
 
         double pwr;
 
-        double a = Double.parseDouble(c);
-        double b = Double.parseDouble(v);
-        pwr = (a * b);
+        try{
 
-        return Math.round(pwr) + " W";
+            double a = Double.parseDouble(c);
+            double b = Double.parseDouble(v);
+            pwr = (a * b);
+
+            DecimalFormat decimalFormat = new DecimalFormat("0.00");
+
+            return decimalFormat.format(pwr) + " W";
+
+        } catch(Exception e){
+
+            return "No Data Found";
+
+        }
 
     }
 

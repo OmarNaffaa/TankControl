@@ -16,17 +16,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
 public class MoreDetails extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_more_details);
         getSupportActionBar().hide();
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         getDetails();
     }
@@ -61,48 +60,42 @@ public class MoreDetails extends AppCompatActivity {
                             String[] mDataSet = new String[SIZE];
                             double HEIGHT = 100; //Adjust height based on size of tank
 
-                            mDataSet[0] = inner.getString("field4") + " "; // Tank 1 Water Level
-                            mDataSet[1] = inner.getString("field5") + " "; // Tank 2 Water Level
-                            mDataSet[2] = inner.getString("field6") + " "; // current
-                            mDataSet[3] = inner.getString("field7") + " "; // voltage
+                            mDataSet[0] = inner.getString("field4"); // Tank 1 Water Level
+                            mDataSet[1] = inner.getString("field5"); // Tank 2 Water Level
+                            mDataSet[2] = inner.getString("field6"); // current
+                            mDataSet[3] = inner.getString("field7"); // voltage
 
                             // parses water levels for calculations
-                            try{
+                            if(mDataSet[0] != "null"){ tankOneProg.setText(CalculateTankOne(mDataSet[0], HEIGHT)); }
+                            else{ tankOneProg.setText("No Data Found"); }
 
-                                double t1 = Double.parseDouble(mDataSet[0].trim());
-                                double t2 = Double.parseDouble(mDataSet[1].trim());
+                            if(mDataSet[1] != "null"){ tankTwoProg.setText(CalculateTankTwo(mDataSet[1], HEIGHT)); }
+                            else{ tankTwoProg.setText("No Data Found"); }
 
-                                String t1Prog = ((t1 / HEIGHT) * 100) + "";
-                                String t2Prog = ((t2 / HEIGHT) * 100) + "";
+                            DecimalFormat decimalFormat = new DecimalFormat("0.00");
 
-                                tankOneProg.setText(t1Prog.substring(0,4) + "% filled");
-                                tankTwoProg.setText(t2Prog.substring(0,4) + "% filled");
+                            // Handles null values and formatting
+                            double[] parsedVal = new double[SIZE];
+                            String[] formattedDataSet = new String[SIZE];
 
-                            } catch(Exception e){
-
-                                tankOneProg.setText("No Data Found");
-                                tankTwoProg.setText("No Data Found");
-
-                            }
-
-                            mDataSet[0] = mDataSet[0].substring(0,5) + " cm";
-                            mDataSet[1] = mDataSet[1].substring(0,5) + " cm";
-                            mDataSet[2] = mDataSet[2].substring(0,5) + " A";
-                            mDataSet[3] = mDataSet[3].substring(0,5) + " V";
-
-                            // Handles null values
-                            CharSequence nullValue = "null  ";
                             for(int i = 0; i < SIZE; i++){
-                                if(mDataSet[i].contains(nullValue)) {
-                                    mDataSet[i] = "No Data Found";
+                                if(mDataSet[i].contains("null")) {
+                                    formattedDataSet[i] = "No Data Found";
+                                } else {
+                                    parsedVal[i] = Double.parseDouble(mDataSet[i]);
+                                    formattedDataSet[i] = decimalFormat.format(parsedVal[i]);
+
+                                    if(i < 2) { formattedDataSet[i] += " cm"; } // adds units conditionally
+                                    if(i == 2) {formattedDataSet[i] += " A"; }
+                                    if(i == 3) {formattedDataSet[i] += " V"; }
                                 }
                             }
 
-                            waterLvlOne.setText(mDataSet[0]);
-                            waterLvlTwo.setText(mDataSet[1]);
-                            currentValue.setText(mDataSet[2]);
-                            voltageValue.setText(mDataSet[3]);
-                            tankHeight.setText(HEIGHT + " cm");
+                            waterLvlOne.setText(formattedDataSet[0]);
+                            waterLvlTwo.setText(formattedDataSet[1]);
+                            currentValue.setText(formattedDataSet[2]);
+                            voltageValue.setText(formattedDataSet[3]);
+                            tankHeight.setText(decimalFormat.format(HEIGHT) + " cm");
 
                         }
                         catch (JSONException e)
@@ -120,6 +113,42 @@ public class MoreDetails extends AppCompatActivity {
         });
 
         MySingleton.getInstance(MoreDetails.this).addToRequestQueue(objectRequest);
+
+    }
+
+    private String CalculateTankOne(String tankOneInfo, double HEIGHT){
+
+        try{
+
+            double t1 = Double.parseDouble(tankOneInfo);
+            double t1Prog = ((t1 / HEIGHT) * 100);
+
+            DecimalFormat decimalFormat = new DecimalFormat("0.00");
+            return decimalFormat.format(t1Prog) + " % filled";
+
+        } catch(Exception e){
+
+            return "No Data Found";
+
+        }
+
+    }
+
+    private String CalculateTankTwo(String tankTwoInfo, double HEIGHT){
+
+        try{
+
+            double t2 = Double.parseDouble(tankTwoInfo);
+            double t2Prog = ((t2 / HEIGHT) * 100);
+
+            DecimalFormat decimalFormat = new DecimalFormat("0.00");
+            return decimalFormat.format(t2Prog) + " % filled";
+
+        } catch(Exception e){
+
+            return "No Data Found";
+
+        }
 
     }
 
