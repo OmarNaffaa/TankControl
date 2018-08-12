@@ -59,7 +59,7 @@ public class MoreDetails extends AppCompatActivity {
                             JSONObject inner = outer.getJSONObject(0);
 
                             String[] mDataSet = new String[SIZE];
-                            int HEIGHT = 100; //Adjust height based on size of tank
+                            double HEIGHT = 100; //Adjust height based on size of tank
 
                             mDataSet[0] = inner.getString("field4") + " "; // Tank 1 Water Level
                             mDataSet[1] = inner.getString("field5") + " "; // Tank 2 Water Level

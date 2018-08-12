@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         final TextView condTxt = findViewById(R.id.cond_val);           // conductivity value
         final TextView flowTxt = findViewById(R.id.flow_val);           // flow rate value
         final TextView pressureTxt = findViewById(R.id.pressure_val);   // pressure value
-        final TextView waterTxt = findViewById(R.id.water_level_val); // water level value
+        final TextView capUsed = findViewById(R.id.water_level_val); // water level value
         final TextView powerTxt = findViewById(R.id.power_val);         // power value
 
         JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.GET, server_url, (JSONObject) null,
@@ -66,55 +66,47 @@ public class MainActivity extends AppCompatActivity {
                             JSONArray outer = response.getJSONArray("feeds");
                             JSONObject inner = outer.getJSONObject(0);
 
-                            // gets each field from ThingSpeak
-                            String[] values = new String[arraySize]; // TODO: Calculate remaining space
+                            // gets each field from ThingSpeak (unitless data is used for calculations)
+                            String[] values = new String[arraySize];
 
-                            values[0] = inner.getString("field1") + " "; // temperature
-                            values[1] = inner.getString("field2") + " "; // conductivity
-                            values[2] = inner.getString("field3") + " "; // flow rate
-                            values[3] = inner.getString("field4") + " "; // Tank 1 Water Level
-                            values[4] = inner.getString("field5") + " "; // Tank 2 Water Level
-                            values[5] = inner.getString("field6") + " "; // current
-                            values[6] = inner.getString("field7") + " "; // voltage
-                            values[7] = inner.getString("field8") + " "; // pressure
-
-                            // format the string and add units
-                            values[0] = values[0].substring(0,5) + " \u00b0C";
-                            values[1] = values[1].substring(0,5) + " S";
-                            values[2] = values[2].substring(0,5) + " cm^3 / s";
-                            values[3] = values[3].substring(0,5) + " cm";
-                            values[4] = values[4].substring(0,5) + " cm";
-                            values[7] = values[7].substring(0,5) + " kPa";
-
-                            // current and voltage are used for power calculation,
-                            // no units added to avoid parse error
-                            values[5] = values[4].substring(0,5);
-                            values[6] = values[5].substring(0,5);
+                            values[0] = inner.getString("field1") + " \u00b0c"; // temperature
+                            values[1] = inner.getString("field2") + " S"; // conductivity
+                            values[2] = inner.getString("field3") + " cm^3 / s"; // flow rate
+                            values[3] = inner.getString("field4"); // Tank 1 Water Level
+                            values[4] = inner.getString("field5"); // Tank 2 Water Level
+                            values[5] = inner.getString("field6"); // current
+                            values[6] = inner.getString("field7"); // voltage
+                            values[7] = inner.getString("field8") + " kPa"; // pressure
 
                             // Handles null values
-                            CharSequence nullValue = "null  ";
                             for(int i = 0; i < arraySize; i++){
-                                if(values[i].contains(nullValue)) {
+                                if(values[i].contains("null")) {
                                     values[i] = "No Data Found";
                                 }
                             }
 
+                            String noData = "No Data Found";
+
                             // calculates power based on current and voltage from ThingSpeak
-                            String pwr;
-                            try{
-                                int a = Integer.parseInt(values[5]);
-                                int b = Integer.parseInt(values[6]);
-                                pwr = Integer.toString(a * b);
-                            } catch(Exception e){
-                                pwr = "No Data Found";
+                            String pwr = noData;
+                            if(values[5] != noData && values[6] != noData)
+                            {
+                                pwr = CalculatePower(values[5], values[6]);
+                            }
+
+                            // calculates remaining space of the system
+                            String spaceLeft = noData;
+                            if(values[3] != noData && values[4] != noData)
+                            {
+                                spaceLeft = CalculateSpaceRemaining(values[3], values[4]);
                             }
 
                             // set the field to the appropriate textbox
                             tempTxt.setText(values[0]);
                             condTxt.setText(values[1]);
                             flowTxt.setText(values[2]);
-                            waterTxt.setText(values[4]);
                             pressureTxt.setText(values[7]);
+                            capUsed.setText(spaceLeft);
                             powerTxt.setText(pwr);
 
                         }
@@ -133,6 +125,35 @@ public class MainActivity extends AppCompatActivity {
         });
 
         MySingleton.getInstance(MainActivity.this).addToRequestQueue(objectRequest);
+
+    }
+
+    private String CalculateSpaceRemaining(String t1, String t2){
+
+        double amntOfSpace;
+        double tankHeight = 100; // adjust based on actual tank height
+
+        double tankOne = Double.parseDouble(t1);
+        double tankTwo = Double.parseDouble(t2);
+
+        double tankOnePcnt = (tankOne / tankHeight) * 100;
+        double tankTwoPcnt = (tankTwo / tankHeight) * 100;
+
+        amntOfSpace = (tankOnePcnt + tankTwoPcnt) / 2;
+
+        return Math.round(amntOfSpace) + "% full";
+
+    }
+
+    private String CalculatePower(String c, String v){
+
+        double pwr;
+
+        double a = Double.parseDouble(c);
+        double b = Double.parseDouble(v);
+        pwr = (a * b);
+
+        return Math.round(pwr) + " W";
 
     }
 
