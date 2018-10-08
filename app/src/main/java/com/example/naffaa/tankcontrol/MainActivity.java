@@ -43,9 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
         getData();
     }
-
-    // Receives the data from ThingSpeak and displays it on the appropriate textbox
-
+    
     // URL of the ThingSpeak channel that the data is being sent to
     String server_url =
             "https://api.thingspeak.com/channels/544573/feeds.json?api_key=NBS23605E6LNZNMS&results=1";
