@@ -7,6 +7,11 @@ import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
 
+/* This class handles the welcome screen when the app is opened.
+   Everything in this class is for the appearance of the app when
+   it is opened up, which means nothing in here affects the functionality
+   of the program.
+ */
 public class Welcome_Screen extends AppCompatActivity {
 
     private static int SCREEN_TIMEOUT = 3;

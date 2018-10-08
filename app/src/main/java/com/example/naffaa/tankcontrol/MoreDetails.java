@@ -26,14 +26,18 @@ public class MoreDetails extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_more_details);
         getSupportActionBar().hide();
+
+        // ensures the screen is always in portrait mode
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         getDetails();
     }
 
+    // URL of the ThingSpeak channel that the data is being sent to
     String server_url =
             "https://api.thingspeak.com/channels/544573/feeds.json?api_key=NBS23605E6LNZNMS&results=1";
 
+    // sets the size of the array based on the amount of data that is being retrieved
     final int SIZE = 4;
 
     private void getDetails(){
@@ -49,15 +53,19 @@ public class MoreDetails extends AppCompatActivity {
         final TextView currentValue = findViewById(R.id.cVal);
         final TextView voltageValue = findViewById(R.id.vVal);
 
+        // create a new JSON object request that will be sent to the queue in the MySingleton class
         JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.GET, server_url, (JSONObject) null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try
                         {
+                            // iterate through the general object request to the JSON object that
+                            // is holding our values
                             JSONArray outer = response.getJSONArray("feeds");
                             JSONObject inner = outer.getJSONObject(0);
 
+                            // array storing the data taken from ThingSpeak
                             String[] mDataSet = new String[SIZE];
                             double HEIGHT = 100; //Adjust height based on size of tank
 
@@ -78,13 +86,15 @@ public class MoreDetails extends AppCompatActivity {
                                 tankOneProg.setText(t1Prog.substring(0,4) + "% filled");
                                 tankTwoProg.setText(t2Prog.substring(0,4) + "% filled");
 
-                            } catch(Exception e){
+                            } catch(Exception e){ // exception handler
 
                                 tankOneProg.setText("No Data Found");
                                 tankTwoProg.setText("No Data Found");
 
                             }
 
+                            // add units to values received from ThingSpeak so they can
+                            // be properly displayed
                             mDataSet[0] = mDataSet[0].substring(0,5) + " cm";
                             mDataSet[1] = mDataSet[1].substring(0,5) + " cm";
                             mDataSet[2] = mDataSet[2].substring(0,5) + " A";
@@ -102,10 +112,10 @@ public class MoreDetails extends AppCompatActivity {
                             waterLvlTwo.setText(mDataSet[1]);
                             currentValue.setText(mDataSet[2]);
                             voltageValue.setText(mDataSet[3]);
-                            tankHeight.setText(HEIGHT + " cm");
+                            tankHeight.setText(HEIGHT + " cm"); // adds unit here since height was calculated at a later point
 
                         }
-                        catch (JSONException e)
+                        catch (JSONException e) // catches exceptions related to making the JSON object request
                         {
                             e.printStackTrace();
                         }
@@ -114,11 +124,13 @@ public class MoreDetails extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error){
 
+                // if an error is caught, display "Connection Error" on the toast at the bottom of the screen
                 Toast.makeText(MoreDetails.this, "Connection Error", Toast.LENGTH_SHORT).show();
 
             }
         });
 
+        // adds the JSON object requests to the queue located in the MySingleton class
         MySingleton.getInstance(MoreDetails.this).addToRequestQueue(objectRequest);
 
     }
