@@ -2,12 +2,14 @@ package com.example.naffaa.tankcontrol;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.system.ErrnoException;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,6 +25,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -36,24 +42,18 @@ public class MainActivity extends AppCompatActivity {
         // ensures the screen is always in portrait mode
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        // Buttons on the interface
-        ToggleButton toggleMotor = findViewById(R.id.motorToggle); // Motor control button
-        ToggleButton toggleValve = findViewById(R.id.valveToggle); // Value control button
-        Button detailButton = findViewById(R.id.detailButton);
-
-        getData();
+        GetData(); // gets the data from ThingSpeak
+        UpdateChannel(); // updates the data from ThingSpeak
     }
-
-    // Receives the data from ThingSpeak and displays it on the appropriate textbox
-
+    
     // URL of the ThingSpeak channel that the data is being sent to
     String server_url =
-            "https://api.thingspeak.com/channels/544573/feeds.json?api_key=NBS23605E6LNZNMS&results=1";
+            "https://api.thingspeak.com/channels/544573/feeds.json?api_key=BAY5Y9HPFP6V3C6G&results=1";
 
     // sets the size of the array based on the amount of data that is being retrieved
     final int arraySize = 8;
 
-    private void getData(){
+    private void GetData(){
 
         // Data textboxes on the interface
         final TextView tempTxt = findViewById(R.id.temp_val);           // temperature value
@@ -173,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
     // refreshes the data every 5 seconds when the activity is showing
     Handler h = new Handler();
     Runnable r;
-    int delay = 1000 * 5; // 15 second delay
+    int delay = 1000 * 5; // 5 second delay for data pull requests
 
     @Override
     protected void onResume(){ // when the activity is active refresh every 5 seconds
@@ -181,7 +181,8 @@ public class MainActivity extends AppCompatActivity {
         h.postDelayed(r = new Runnable() {
             @Override
             public void run() {
-                getData();
+                GetData();
+                UpdateChannel();
                 h.postDelayed(r, delay);
             }
         }, delay);
@@ -200,5 +201,39 @@ public class MainActivity extends AppCompatActivity {
     public void Details(View v) {
         Intent intent = new Intent(MainActivity.this, MoreDetails.class);
         startActivity(intent);
+    }
+
+    // call this method to update the ThingSpeak channel
+    public void UpdateChannel(){
+
+        // specified links used to update the status of both buttons on ThingSpeak
+        String bothOn  = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=1&field2=1";
+        String motorOn = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=1&field2=0";
+        String valveOn = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=0&field2=1";
+        String bothOff = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=0&field2=0";
+
+        // used to open ThingSpeak in order to refresh the status of the buttons
+        WebView updateChannel = findViewById(R.id.update);
+
+        // Buttons on the interface
+        ToggleButton mTog = findViewById(R.id.motorToggle); // Motor control button
+        ToggleButton vTog = findViewById(R.id.valveToggle); // Value control button
+
+        if(mTog.isChecked() && vTog.isChecked()){
+            updateChannel.loadUrl(bothOn);
+        }
+        // if the motor button is switched on and the valve button is off, update the channel to ON and OFF (1 and 0)
+        if(mTog.isChecked() && !vTog.isChecked()){
+            updateChannel.loadUrl(motorOn);
+        }
+        // if the motor button is switched off and the valve button is on, update the channel to OFF and ON (0 and 1)
+        if(!mTog.isChecked() && vTog.isChecked()){
+            updateChannel.loadUrl(valveOn);
+        }
+        // if the motor button is switched off and the valve button is off, update the channel to OFF and OFF (0 and 0)
+        if(!mTog.isChecked() && !vTog.isChecked()){
+            updateChannel.loadUrl(bothOff);
+        }
+
     }
 }

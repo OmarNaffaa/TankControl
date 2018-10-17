@@ -11,9 +11,9 @@
         android:id="@+id/motorToggle"
         android:layout_width="0dp"
         android:layout_height="80dp"
-        android:layout_marginBottom="20dp"
-        android:layout_marginEnd="10dp"
         android:layout_marginStart="20dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="20dp"
         android:checked="false"
         android:fontFamily="@font/eczar_medium"
         android:text="ToggleButton"
@@ -22,6 +22,7 @@
         android:textOff="Motor Off"
         android:textOn="Motor On"
         android:textSize="24sp"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/valveToggle"
         app:layout_constraintStart_toStartOf="parent" />
@@ -30,9 +31,9 @@
         android:id="@+id/valveToggle"
         android:layout_width="0dp"
         android:layout_height="80dp"
-        android:layout_marginBottom="20dp"
-        android:layout_marginEnd="20dp"
         android:layout_marginStart="10dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
         android:checked="false"
         android:fontFamily="@font/eczar_medium"
         android:text="ToggleButton"
@@ -41,6 +42,7 @@
         android:textOff="Valve Off"
         android:textOn="Valve On"
         android:textSize="24sp"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/motorToggle" />
@@ -446,5 +448,19 @@
             android:textColor="@color/colorAccent"
             android:textSize="16sp" />
     </android.support.v7.widget.CardView>
+
+    <WebView
+        android:id="@+id/update"
+        android:layout_width="33dp"
+        android:layout_height="31dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
 </android.support.constraint.ConstraintLayout>

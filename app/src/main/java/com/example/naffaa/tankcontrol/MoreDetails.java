@@ -19,6 +19,8 @@ import org.json.JSONObject;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
+import static java.lang.Math.round;
+
 public class MoreDetails extends AppCompatActivity {
 
     @Override
@@ -35,7 +37,7 @@ public class MoreDetails extends AppCompatActivity {
 
     // URL of the ThingSpeak channel that the data is being sent to
     String server_url =
-            "https://api.thingspeak.com/channels/544573/feeds.json?api_key=NBS23605E6LNZNMS&results=1";
+            "https://api.thingspeak.com/channels/544573/feeds.json?api_key=BAY5Y9HPFP6V3C6G&results=1";
 
     // sets the size of the array based on the amount of data that is being retrieved
     final int SIZE = 4;
@@ -80,11 +82,14 @@ public class MoreDetails extends AppCompatActivity {
                                 double t1 = Double.parseDouble(mDataSet[0].trim());
                                 double t2 = Double.parseDouble(mDataSet[1].trim());
 
-                                String t1Prog = ((t1 / HEIGHT) * 100) + "";
-                                String t2Prog = ((t2 / HEIGHT) * 100) + "";
+                                double t1Prog = ((t1 / HEIGHT) * 100);
+                                double t2Prog = ((t2 / HEIGHT) * 100);
 
-                                tankOneProg.setText(t1Prog.substring(0,4) + "% filled");
-                                tankTwoProg.setText(t2Prog.substring(0,4) + "% filled");
+                                t1Prog = Math.round(t1Prog);
+                                t2Prog = Math.round(t2Prog);
+
+                                tankOneProg.setText(t1Prog + "% filled");
+                                tankTwoProg.setText(t2Prog + "% filled");
 
                             } catch(Exception e){ // exception handler
 
@@ -95,10 +100,10 @@ public class MoreDetails extends AppCompatActivity {
 
                             // add units to values received from ThingSpeak so they can
                             // be properly displayed
-                            mDataSet[0] = mDataSet[0].substring(0,5) + " cm";
-                            mDataSet[1] = mDataSet[1].substring(0,5) + " cm";
-                            mDataSet[2] = mDataSet[2].substring(0,5) + " A";
-                            mDataSet[3] = mDataSet[3].substring(0,5) + " V";
+                            mDataSet[0] = mDataSet[0] + " cm";
+                            mDataSet[1] = mDataSet[1] + " cm";
+                            mDataSet[2] = mDataSet[2] + " A";
+                            mDataSet[3] = mDataSet[3] + " V";
 
                             // Handles null values
                             CharSequence nullValue = "null  ";
@@ -138,7 +143,7 @@ public class MoreDetails extends AppCompatActivity {
     // refreshes the data when the activity is active every 5 seconds
     Handler h = new Handler();
     Runnable r;
-    int delay = 1000 * 5; // time delay
+    int delay = 1000 * 1; // time delay
 
     @Override
     protected void onResume(){ // when the activity is active refresh every x seconds
@@ -146,7 +151,7 @@ public class MoreDetails extends AppCompatActivity {
         h.postDelayed(r = new Runnable() {
             @Override
             public void run() {
-                getDetails();
+                //getDetails();
                 h.postDelayed(r, delay);
             }
         }, delay);
