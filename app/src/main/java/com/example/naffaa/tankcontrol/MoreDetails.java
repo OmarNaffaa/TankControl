@@ -44,6 +44,9 @@ public class MoreDetails extends AppCompatActivity {
 
     private void getDetails(){
 
+        // formatting for numbers set the decimal to up to 2 places
+        final DecimalFormat df = new DecimalFormat("#.##");
+
         // water data text fields
         final TextView waterLvlOne = findViewById(R.id.tankOneLvl);
         final TextView tankOneProg = findViewById(R.id.tankOneProgress);
@@ -69,55 +72,41 @@ public class MoreDetails extends AppCompatActivity {
 
                             // array storing the data taken from ThingSpeak
                             String[] mDataSet = new String[SIZE];
-                            double HEIGHT = 100; //Adjust height based on size of tank
+                            float[] numDataSet = new float[SIZE];
+
+                            float HEIGHT = 36; //Adjust height based on size of tank
 
                             mDataSet[0] = inner.getString("field4") + " "; // Tank 1 Water Level
                             mDataSet[1] = inner.getString("field5") + " "; // Tank 2 Water Level
                             mDataSet[2] = inner.getString("field6") + " "; // current
                             mDataSet[3] = inner.getString("field7") + " "; // voltage
 
-                            // parses water levels for calculations
-                            try{
+                            // attempt to parse the data from string to float
+                            float errorValue = 100000;
 
-                                double t1 = Double.parseDouble(mDataSet[0].trim());
-                                double t2 = Double.parseDouble(mDataSet[1].trim());
-
-                                double t1Prog = ((t1 / HEIGHT) * 100);
-                                double t2Prog = ((t2 / HEIGHT) * 100);
-
-                                t1Prog = Math.round(t1Prog);
-                                t2Prog = Math.round(t2Prog);
-
-                                tankOneProg.setText(t1Prog + "% filled");
-                                tankTwoProg.setText(t2Prog + "% filled");
-
-                            } catch(Exception e){ // exception handler
-
-                                tankOneProg.setText("No Data Found");
-                                tankTwoProg.setText("No Data Found");
-
-                            }
-
-                            // add units to values received from ThingSpeak so they can
-                            // be properly displayed
-                            mDataSet[0] = mDataSet[0] + " cm";
-                            mDataSet[1] = mDataSet[1] + " cm";
-                            mDataSet[2] = mDataSet[2] + " A";
-                            mDataSet[3] = mDataSet[3] + " V";
-
-                            // Handles null values
-                            CharSequence nullValue = "null  ";
                             for(int i = 0; i < SIZE; i++){
-                                if(mDataSet[i].contains(nullValue)) {
-                                    mDataSet[i] = "No Data Found";
-                                }
+
+                                // attempt to parse string from ThingSpeak to a float
+                                try{ numDataSet[i] = Float.parseFloat(mDataSet[i]); }
+                                // if a null value is detected, place error value in the array
+                                catch(Exception e){ numDataSet[i] = errorValue; }
+
                             }
 
-                            waterLvlOne.setText(mDataSet[0]);
-                            waterLvlTwo.setText(mDataSet[1]);
-                            currentValue.setText(mDataSet[2]);
-                            voltageValue.setText(mDataSet[3]);
-                            tankHeight.setText(HEIGHT + " cm"); // adds unit here since height was calculated at a later point
+                            // set the value for the percentage of the tank filled
+                            tankOneProg.setText(df.format(numDataSet[0]) + " % filled");
+                            tankTwoProg.setText(df.format(numDataSet[1]) + " % filled");
+
+                            // set the values for the height of each tank that is filled
+                            waterLvlOne.setText(df.format((numDataSet[0] / 100) * HEIGHT) + " cm");
+                            waterLvlTwo.setText(df.format((numDataSet[1] / 100) * HEIGHT) + " cm");
+
+                            // set the value of the current and the voltage
+                            currentValue.setText(df.format(numDataSet[2]) + " A");
+                            voltageValue.setText(df.format(numDataSet[3]) + " V");
+
+                            // set the value for the height of the tank
+                            tankHeight.setText(df.format(HEIGHT) + " cm");
 
                         }
                         catch (JSONException e) // catches exceptions related to making the JSON object request
