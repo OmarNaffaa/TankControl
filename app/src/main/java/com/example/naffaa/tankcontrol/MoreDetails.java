@@ -45,7 +45,7 @@ public class MoreDetails extends AppCompatActivity {
     private void getDetails(){
 
         // formatting for numbers set the decimal to up to 2 places
-        final DecimalFormat df = new DecimalFormat("#.##");
+        final DecimalFormat df = new DecimalFormat("0.0");
 
         // water data text fields
         final TextView waterLvlOne = findViewById(R.id.tankOneLvl);
@@ -76,8 +76,8 @@ public class MoreDetails extends AppCompatActivity {
 
                             float HEIGHT = 36; //Adjust height based on size of tank
 
-                            mDataSet[0] = inner.getString("field4") + " "; // Tank 1 Water Level
-                            mDataSet[1] = inner.getString("field5") + " "; // Tank 2 Water Level
+                            mDataSet[0] = inner.getString("field5") + " "; // Tank 1 Water Level
+                            mDataSet[1] = inner.getString("field8") + " "; // Tank 2 Water Level
                             mDataSet[2] = inner.getString("field6") + " "; // current
                             mDataSet[3] = inner.getString("field7") + " "; // voltage
 

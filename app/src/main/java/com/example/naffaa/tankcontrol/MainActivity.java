@@ -2,15 +2,11 @@ package com.example.naffaa.tankcontrol;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.CardView;
-import android.system.ErrnoException;
 import android.view.View;
 import android.webkit.WebView;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -23,11 +19,8 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.text.DecimalFormat;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         // ensures the screen is always in portrait mode
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        GetData(); // gets the data from ThingSpeak
+        GetSensorData(); // gets the data from ThingSpeak
         UpdateChannel(); // updates the data from ThingSpeak
     }
     
@@ -53,7 +46,9 @@ public class MainActivity extends AppCompatActivity {
     // sets the size of the array based on the amount of data that is being retrieved
     final int arraySize = 8;
 
-    private void GetData(){
+    private void GetSensorData(){
+        // formatting for numbers set the decimal to up to 2 places
+        final DecimalFormat df = new DecimalFormat("0.0");
 
         // Data textboxes on the interface
         final TextView tempTxt = findViewById(R.id.temp_val);           // temperature value
@@ -77,46 +72,35 @@ public class MainActivity extends AppCompatActivity {
 
                             // gets each field from ThingSpeak (unitless data is used for calculations)
                             String[] values = new String[arraySize];
+                            float[] floatValues = new float[arraySize];
 
-                            values[0] = inner.getString("field1") + " \u00b0c";  // temperature
-                            values[1] = inner.getString("field2") + " S";        // conductivity
-                            values[2] = inner.getString("field3") + " cm^3 / s"; // flow rate
-                            values[3] = inner.getString("field4");               // Tank 1 Water Level
-                            values[4] = inner.getString("field5");               // Tank 2 Water Level
-                            values[5] = inner.getString("field6");               // current
-                            values[6] = inner.getString("field7");               // voltage
-                            values[7] = inner.getString("field8") + " kPa";      // pressure
+                            values[0] = inner.getString("field1"); // temperature
+                            values[1] = inner.getString("field2"); // conductivity
+                            values[2] = inner.getString("field3"); // flow rate
+                            values[3] = inner.getString("field5"); // Tank 1 Water Level
+                            values[4] = inner.getString("field8"); // Tank 2 Water Level
+                            values[5] = inner.getString("field6"); // current
+                            values[6] = inner.getString("field7"); // voltage
+                            values[7] = inner.getString("field4"); // pressure
 
-                            // If no data is found, the value displayed will be "No Data Found"
-                            String noData = "No Data Found";
+                            // attempt to parse the data from string to float
+                            float errorValue = 100000;
 
                             for(int i = 0; i < arraySize; i++){
-                                if(values[i].contains("null")) {
-                                    values[i] = noData;
-                                }
+
+                                // attempt to parse string from ThingSpeak to a float
+                                try{ floatValues[i] = Float.parseFloat(values[i]); }
+                                // if a null value is detected, place error value in the array
+                                catch(Exception e){ floatValues[i] = errorValue; }
+
                             }
 
-                            // calculates power based on current and voltage from ThingSpeak
-                            String pwr = noData;
-                            if(values[5] != noData && values[6] != noData)  // if there is a voltage and a current
-                            {
-                                pwr = CalculatePower(values[5], values[6]); // calculate the power
-                            }
-
-                            // calculates remaining capacity of the system
-                            String spaceLeft = noData;
-                            if(values[3] != noData && values[4] != noData) // if there is data for both tank water levels
-                            {
-                                spaceLeft = CalculateSpaceRemaining(values[3], values[4]); // calculate the space remaining
-                            }
-
-                            // set the field to the appropriate textbox
-                            tempTxt.setText(values[0]);
-                            condTxt.setText(values[1]);
-                            flowTxt.setText(values[2]);
-                            pressureTxt.setText(values[7]);
-                            capUsed.setText(spaceLeft);
-                            powerTxt.setText(pwr);
+                            tempTxt.setText(df.format(floatValues[0]) + " \u00b0C"); // set the temperature
+                            condTxt.setText(df.format(floatValues[1]) + " S"); // set the conductivity
+                            flowTxt.setText(df.format(floatValues[2]) + " L / min"); // set flow rate
+                            pressureTxt.setText(df.format(floatValues[7]) + " psi");
+                            capUsed.setText(df.format((floatValues[3] + floatValues[4]) / 2) + " % full");
+                            powerTxt.setText(df.format(floatValues[5] * floatValues[6]) + " W");
 
                         }
                         catch (JSONException e) // catches errors
@@ -139,37 +123,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    // Calculates the space remaining in the two tanks
-    private String CalculateSpaceRemaining(String t1, String t2){
-
-        double amntOfSpace;
-        double tankHeight = 100; // adjust based on actual tank height
-
-        double tankOne = Double.parseDouble(t1);
-        double tankTwo = Double.parseDouble(t2);
-
-        double tankOnePcnt = (tankOne / tankHeight) * 100;
-        double tankTwoPcnt = (tankTwo / tankHeight) * 100;
-
-        amntOfSpace = (tankOnePcnt + tankTwoPcnt) / 2;
-
-        return Math.round(amntOfSpace) + "% full";
-
-    }
-
-    // Calculates the power of the system
-    private String CalculatePower(String c, String v){
-
-        double pwr;
-
-        double a = Double.parseDouble(c);
-        double b = Double.parseDouble(v);
-        pwr = (a * b);
-
-        return Math.round(pwr) + " W";
-
-    }
-
     // refreshes the data every 5 seconds when the activity is showing
     Handler h = new Handler();
     Runnable r;
@@ -181,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
         h.postDelayed(r = new Runnable() {
             @Override
             public void run() {
-                GetData();
+                GetSensorData();
                 UpdateChannel();
                 h.postDelayed(r, delay);
             }
