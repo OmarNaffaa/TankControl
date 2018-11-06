@@ -5,10 +5,8 @@ import android.content.pm.ActivityInfo;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.CardView;
-import android.system.ErrnoException;
 import android.view.View;
-import android.widget.Button;
+import android.webkit.WebView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -21,7 +19,6 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.text.DecimalFormat;
 
@@ -30,93 +27,91 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        // configurations for the app
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
 
-        // Buttons on the interface
-        ToggleButton toggleMotor = findViewById(R.id.motorToggle);
-        ToggleButton toggleValve = findViewById(R.id.valveToggle);
-        Button detailButton = findViewById(R.id.detailButton);
+        // ensures the screen is always in portrait mode
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        getData();
+        InitializePump();
+        InitializeValve();
+
+        GetSensorData(); // gets the data from ThingSpeak
+        UpdateChannel(); // updates the data from ThingSpeak
     }
+    
+    // URL of the ThingSpeak channel for the sensor data, pump state, and value state
+    String sensor_server_url =
+            "https://api.thingspeak.com/channels/544573/feeds.json?api_key=BAY5Y9HPFP6V3C6G&results=1";
+    String pump_state_url =
+            "https://api.thingspeak.com/channels/603121/fields/3.json?api_key=RREYB0QH84HAKNIZ&results=1";
+    String valve_state_url =
+            "https://api.thingspeak.com/channels/603121/fields/4.json?api_key=RREYB0QH84HAKNIZ&results=1";
 
-    // Receives the data from ThingSpeak and displays it on the appropriate
-    // textbox
-    String server_url =
-            "https://api.thingspeak.com/channels/544573/feeds.json?api_key=NBS23605E6LNZNMS&results=1";
+    // sets the size of the array based on the amount of data that is being retrieved
     final int arraySize = 8;
 
-    private void getData(){
+    // retreives data from a ThingSpeak channel that contains sensor information
+    private void GetSensorData(){
+        // formatting for numbers set the decimal to up to 2 places
+        final DecimalFormat df = new DecimalFormat("0.0");
 
         // Data textboxes on the interface
         final TextView tempTxt = findViewById(R.id.temp_val);           // temperature value
         final TextView condTxt = findViewById(R.id.cond_val);           // conductivity value
         final TextView flowTxt = findViewById(R.id.flow_val);           // flow rate value
         final TextView pressureTxt = findViewById(R.id.pressure_val);   // pressure value
-        final TextView capUsed = findViewById(R.id.water_level_val); // water level value
+        final TextView capUsed = findViewById(R.id.water_level_val);    // water level value
         final TextView powerTxt = findViewById(R.id.power_val);         // power value
 
-        JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.GET, server_url, (JSONObject) null,
+        // create a new JSON object request that will be sent to the queue in the MySingleton class
+        JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.GET, sensor_server_url, (JSONObject) null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try
                         {
+                            // iterate through the general object request to the JSON object that
+                            // is holding our values
                             JSONArray outer = response.getJSONArray("feeds");
                             JSONObject inner = outer.getJSONObject(0);
 
                             // gets each field from ThingSpeak (unitless data is used for calculations)
                             String[] values = new String[arraySize];
+                            float[] floatValues = new float[arraySize];
 
                             values[0] = inner.getString("field1"); // temperature
                             values[1] = inner.getString("field2"); // conductivity
                             values[2] = inner.getString("field3"); // flow rate
-                            values[3] = inner.getString("field4"); // Tank 1 Water Level
-                            values[4] = inner.getString("field5"); // Tank 2 Water Level
+                            values[3] = inner.getString("field5"); // Tank 1 Water Level
+                            values[4] = inner.getString("field8"); // Tank 2 Water Level
                             values[5] = inner.getString("field6"); // current
                             values[6] = inner.getString("field7"); // voltage
-                            values[7] = inner.getString("field8"); // pressure
+                            values[7] = inner.getString("field4"); // pressure
 
-                            // Handles null values
-                            double[] parsedVal = new double[arraySize];
-                            String[] formattedValues = new String[arraySize];
-                            DecimalFormat decimalFormat = new DecimalFormat("0.00");
+                            // attempt to parse the data from string to float
+                            float errorValue = 100000;
 
                             for(int i = 0; i < arraySize; i++){
-                                if(values[i].contains("null")) {
-                                    formattedValues[i] = "No Data Found";
-                                } else {
-                                    parsedVal[i] = Double.parseDouble(values[i]);
-                                    formattedValues[i] = decimalFormat.format(parsedVal[i]);
 
-                                    if(i == 0){ formattedValues[i] += " \u00b0C"; } // adds units conditionally
-                                    if(i == 1){ formattedValues[i] += " S"; }
-                                    if(i == 2){ formattedValues[i] += " cm^3 / s"; }
-                                    if(i == 7){ formattedValues[i] += " kPa"; }
-                                }
+                                // attempt to parse string from ThingSpeak to a float
+                                try{ floatValues[i] = Float.parseFloat(values[i]); }
+                                // if a null value is detected, place error value in the array
+                                catch(Exception e){ floatValues[i] = errorValue; }
+
                             }
 
-                            String pwr, spaceLeft;
-
-                            // calculates power based on current and voltage from ThingSpeak
-                            pwr = CalculatePower(values[5], values[6]);
-
-                            // calculates remaining space of the system
-                            spaceLeft = CalculateSpaceRemaining(values[3], values[4]);
-
-                            // set the field to the appropriate textbox
-                            tempTxt.setText(formattedValues[0]);
-                            condTxt.setText(formattedValues[1]);
-                            flowTxt.setText(formattedValues[2]);
-                            pressureTxt.setText(formattedValues[7]);
-                            capUsed.setText(spaceLeft);
-                            powerTxt.setText(pwr);
+                            tempTxt.setText(df.format(floatValues[0]) + " \u00b0C"); // set the temperature
+                            condTxt.setText(df.format(floatValues[1]) + " S"); // set the conductivity
+                            flowTxt.setText(df.format(floatValues[2]) + " L / min"); // set flow rate
+                            pressureTxt.setText(df.format(floatValues[7]) + " psi");
+                            capUsed.setText(df.format((floatValues[3] + floatValues[4]) / 2) + " % full");
+                            powerTxt.setText(df.format(floatValues[5] * floatValues[6]) + " W");
 
                         }
-                        catch (JSONException e)
+                        catch (JSONException e) // catches errors
                         {
                             e.printStackTrace();
                         }
@@ -125,60 +120,151 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error){
 
+                // if there is an error display "Connection Error" on the toast at the bottom of the screen
                 Toast.makeText(MainActivity.this, "Connection Error", Toast.LENGTH_SHORT).show();
 
             }
         });
 
+        // Add the JSON object request the the queue (located in the MySingleton class
         MySingleton.getInstance(MainActivity.this).addToRequestQueue(objectRequest);
 
     }
 
-    private String CalculateSpaceRemaining(String t1, String t2){
+    // reads the initial state of the pump on the system and sets the toggle button accordingly
+    private void InitializePump(){
 
-        double amntOfSpace;
-        double tankHeight = 100; // adjust based on actual tank height
+        final ToggleButton pump = findViewById(R.id.pumpToggle);
 
-        try{
+        // create a new JSON object request that will be sent to the queue in the MySingleton class
+        JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.GET, pump_state_url, (JSONObject) null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
 
-            double tankOne = Double.parseDouble(t1);
-            double tankTwo = Double.parseDouble(t2);
+                        try
+                        {
+                            // iterate through the general object request to the JSON object that
+                            // is holding our values
+                            JSONArray outer = response.getJSONArray("feeds");
+                            JSONObject inner = outer.getJSONObject(0);
 
-            double tankOnePcnt = (tankOne / tankHeight) * 100;
-            double tankTwoPcnt = (tankTwo / tankHeight) * 100;
+                            // gets the state of the pump and sets the toggle button state
+                            String toggleState = inner.getString("field3");
 
-            amntOfSpace = (tankOnePcnt + tankTwoPcnt) / 2;
+                            if(Integer.parseInt(toggleState) == 1) // if the pump is on keep it on initially
+                                pump.setChecked(true);
+                            else                                   // otherwise set the pump to off initially
+                                pump.setChecked(false);
 
-            DecimalFormat decimalFormat = new DecimalFormat("#.00");
+                        }
+                        catch (JSONException e) // catches json request errors
+                        {
+                            e.printStackTrace();
+                        }
+                        catch (NumberFormatException ex) // catches integer parse error
+                        {
+                            pump.setChecked(false); // if no number is detected leave the motor on the off state
+                        }
 
-            return decimalFormat.format(amntOfSpace) + "% filled";
+                    }
+                }, new Response.ErrorListener(){
+            @Override
+            public void onErrorResponse(VolleyError error){
 
-        } catch(Exception e){
+                // if there is an error display "Connection Error" on the toast at the bottom of the screen
+                Toast.makeText(MainActivity.this, "Connection Error", Toast.LENGTH_SHORT).show();
 
-            return "No Data Found";
+            }
+        });
 
-        }
+        // Add the JSON object request the the queue (located in the MySingleton class
+        MySingleton.getInstance(MainActivity.this).addToRequestQueue(objectRequest);
 
     }
 
-    private String CalculatePower(String c, String v){
+    // reads the initial state of the pump on the system and sets the toggle button accordingly
+    private void InitializeValve(){
 
-        double pwr;
+        final ToggleButton valve = findViewById(R.id.valveToggle);
 
-        try{
+        // create a new JSON object request that will be sent to the queue in the MySingleton class
+        JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.GET, valve_state_url, (JSONObject) null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
 
-            double a = Double.parseDouble(c);
-            double b = Double.parseDouble(v);
-            pwr = (a * b);
+                        try
+                        {
+                            // iterate through the general object request to the JSON object that
+                            // is holding our values
+                            JSONArray outer = response.getJSONArray("feeds");
+                            JSONObject inner = outer.getJSONObject(0);
 
-            DecimalFormat decimalFormat = new DecimalFormat("#.00");
+                            // gets the state of the pump and sets the toggle button state
+                            String toggleState = inner.getString("field4");
 
-            return decimalFormat.format(pwr) + " W";
+                            if(Integer.parseInt(toggleState) == 1) // if the pump is on keep it on initially
+                                valve.setChecked(true);
+                            else                                   // otherwise set the pump to off initially
+                                valve.setChecked(false);
 
-        } catch(Exception e){
+                        }
+                        catch (JSONException e) // catches json request errors
+                        {
+                            e.printStackTrace();
+                        }
+                        catch (NumberFormatException ex) // catches integer parse error
+                        {
+                            valve.setChecked(false); // if no number is detected leave the motor on the off state
+                        }
 
-            return "No Data Found";
+                    }
+                }, new Response.ErrorListener(){
+            @Override
+            public void onErrorResponse(VolleyError error){
 
+                // if there is a connection error display "Connection Error" on the toast at the bottom of the screen
+                Toast.makeText(MainActivity.this, "Connection Error", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
+        // Add the JSON object request the the queue (located in the MySingleton class
+        MySingleton.getInstance(MainActivity.this).addToRequestQueue(objectRequest);
+
+    }
+
+    // call this method to update the ThingSpeak channel
+    private void UpdateChannel(){
+
+        // specified links used to update the status of both buttons on ThingSpeak
+        String bothOn  = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=1&field2=1";
+        String motorOn = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=1&field2=0";
+        String valveOn = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=0&field2=1";
+        String bothOff = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=0&field2=0";
+
+        // used to open ThingSpeak in order to refresh the status of the buttons
+        WebView updateChannel = findViewById(R.id.update);
+
+        // Buttons on the interface
+        ToggleButton mTog = findViewById(R.id.pumpToggle); // Motor control button
+        ToggleButton vTog = findViewById(R.id.valveToggle); // Value control button
+
+        if(mTog.isChecked() && vTog.isChecked()){
+            updateChannel.loadUrl(bothOn);
+        }
+        // if the motor button is switched on and the valve button is off, update the channel to ON and OFF (1 and 0)
+        if(mTog.isChecked() && !vTog.isChecked()){
+            updateChannel.loadUrl(motorOn);
+        }
+        // if the motor button is switched off and the valve button is on, update the channel to OFF and ON (0 and 1)
+        if(!mTog.isChecked() && vTog.isChecked()){
+            updateChannel.loadUrl(valveOn);
+        }
+        // if the motor button is switched off and the valve button is off, update the channel to OFF and OFF (0 and 0)
+        if(!mTog.isChecked() && !vTog.isChecked()){
+            updateChannel.loadUrl(bothOff);
         }
 
     }
@@ -186,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
     // refreshes the data every 5 seconds when the activity is showing
     Handler h = new Handler();
     Runnable r;
-    int delay = 1000 * 5; // 15 second delay
+    int delay = 1000 * 5; // 5 second delay for data pull requests
 
     @Override
     protected void onResume(){ // when the activity is active refresh every 5 seconds
@@ -194,7 +280,8 @@ public class MainActivity extends AppCompatActivity {
         h.postDelayed(r = new Runnable() {
             @Override
             public void run() {
-                getData();
+                GetSensorData();
+                UpdateChannel();
                 h.postDelayed(r, delay);
             }
         }, delay);
@@ -214,4 +301,5 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(MainActivity.this, MoreDetails.class);
         startActivity(intent);
     }
+
 }

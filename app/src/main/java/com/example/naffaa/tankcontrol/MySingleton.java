@@ -9,6 +9,13 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
 
+/* Standard MySingleton class taken from Android documentation
+   The purpose of this class is to handle JSON object requests
+   that come in from the MainActivity and MoreDetails classes by
+   putting them in a queue. This makes sure the requests are
+   managed across the entire app, allowing requests to be made
+   in order.
+ */
 public class MySingleton {
 
     private static MySingleton mInstance;

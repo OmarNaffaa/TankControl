@@ -16,26 +16,36 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
+
+import static java.lang.Math.round;
 
 public class MoreDetails extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_more_details);
         getSupportActionBar().hide();
 
+        // ensures the screen is always in portrait mode
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         getDetails();
     }
 
+    // URL of the ThingSpeak channel that the data is being sent to
     String server_url =
-            "https://api.thingspeak.com/channels/544573/feeds.json?api_key=NBS23605E6LNZNMS&results=1";
+            "https://api.thingspeak.com/channels/544573/feeds.json?api_key=BAY5Y9HPFP6V3C6G&results=1";
 
+    // sets the size of the array based on the amount of data that is being retrieved
     final int SIZE = 4;
 
     private void getDetails(){
+
+        // formatting for numbers set the decimal to up to 2 places
+        final DecimalFormat df = new DecimalFormat("0.0");
 
         // water data text fields
         final TextView waterLvlOne = findViewById(R.id.tankOneLvl);
@@ -48,57 +58,58 @@ public class MoreDetails extends AppCompatActivity {
         final TextView currentValue = findViewById(R.id.cVal);
         final TextView voltageValue = findViewById(R.id.vVal);
 
+        // create a new JSON object request that will be sent to the queue in the MySingleton class
         JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.GET, server_url, (JSONObject) null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try
                         {
+                            // iterate through the general object request to the JSON object that
+                            // is holding our values
                             JSONArray outer = response.getJSONArray("feeds");
                             JSONObject inner = outer.getJSONObject(0);
 
+                            // array storing the data taken from ThingSpeak
                             String[] mDataSet = new String[SIZE];
-                            double HEIGHT = 100; //Adjust height based on size of tank
+                            float[] numDataSet = new float[SIZE];
 
-                            mDataSet[0] = inner.getString("field4"); // Tank 1 Water Level
-                            mDataSet[1] = inner.getString("field5"); // Tank 2 Water Level
-                            mDataSet[2] = inner.getString("field6"); // current
-                            mDataSet[3] = inner.getString("field7"); // voltage
+                            float HEIGHT = 36; //Adjust height based on size of tank
 
-                            // parses water levels for calculations
-                            if(mDataSet[0] != "null"){ tankOneProg.setText(CalculateTankOne(mDataSet[0], HEIGHT)); }
-                            else{ tankOneProg.setText("No Data Found"); }
+                            mDataSet[0] = inner.getString("field5") + " "; // Tank 1 Water Level
+                            mDataSet[1] = inner.getString("field8") + " "; // Tank 2 Water Level
+                            mDataSet[2] = inner.getString("field6") + " "; // current
+                            mDataSet[3] = inner.getString("field7") + " "; // voltage
 
-                            if(mDataSet[1] != "null"){ tankTwoProg.setText(CalculateTankTwo(mDataSet[1], HEIGHT)); }
-                            else{ tankTwoProg.setText("No Data Found"); }
-
-                            DecimalFormat decimalFormat = new DecimalFormat("#.00");
-
-                            // Handles null values and formatting
-                            double[] parsedVal = new double[SIZE];
-                            String[] formattedDataSet = new String[SIZE];
+                            // attempt to parse the data from string to float
+                            float errorValue = 100000;
 
                             for(int i = 0; i < SIZE; i++){
-                                if(mDataSet[i].contains("null")) {
-                                    formattedDataSet[i] = "No Data Found";
-                                } else {
-                                    parsedVal[i] = Double.parseDouble(mDataSet[i]);
-                                    formattedDataSet[i] = decimalFormat.format(parsedVal[i]);
 
-                                    if(i < 2) { formattedDataSet[i] += " cm"; } // adds units conditionally
-                                    if(i == 2) {formattedDataSet[i] += " A"; }
-                                    if(i == 3) {formattedDataSet[i] += " V"; }
-                                }
+                                // attempt to parse string from ThingSpeak to a float
+                                try{ numDataSet[i] = Float.parseFloat(mDataSet[i]); }
+                                // if a null value is detected, place error value in the array
+                                catch(Exception e){ numDataSet[i] = errorValue; }
+
                             }
 
-                            waterLvlOne.setText(formattedDataSet[0]);
-                            waterLvlTwo.setText(formattedDataSet[1]);
-                            currentValue.setText(formattedDataSet[2]);
-                            voltageValue.setText(formattedDataSet[3]);
-                            tankHeight.setText(decimalFormat.format(HEIGHT) + " cm");
+                            // set the value for the percentage of the tank filled
+                            tankOneProg.setText(df.format(numDataSet[0]) + " % filled");
+                            tankTwoProg.setText(df.format(numDataSet[1]) + " % filled");
+
+                            // set the values for the height of each tank that is filled
+                            waterLvlOne.setText(df.format((numDataSet[0] / 100) * HEIGHT) + " cm");
+                            waterLvlTwo.setText(df.format((numDataSet[1] / 100) * HEIGHT) + " cm");
+
+                            // set the value of the current and the voltage
+                            currentValue.setText(df.format(numDataSet[2]) + " A");
+                            voltageValue.setText(df.format(numDataSet[3]) + " V");
+
+                            // set the value for the height of the tank
+                            tankHeight.setText(df.format(HEIGHT) + " cm");
 
                         }
-                        catch (JSONException e)
+                        catch (JSONException e) // catches exceptions related to making the JSON object request
                         {
                             e.printStackTrace();
                         }
@@ -107,55 +118,21 @@ public class MoreDetails extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error){
 
+                // if an error is caught, display "Connection Error" on the toast at the bottom of the screen
                 Toast.makeText(MoreDetails.this, "Connection Error", Toast.LENGTH_SHORT).show();
 
             }
         });
 
+        // adds the JSON object requests to the queue located in the MySingleton class
         MySingleton.getInstance(MoreDetails.this).addToRequestQueue(objectRequest);
-
-    }
-
-    private String CalculateTankOne(String tankOneInfo, double HEIGHT){
-
-        try{
-
-            double t1 = Double.parseDouble(tankOneInfo);
-            double t1Prog = ((t1 / HEIGHT) * 100);
-
-            DecimalFormat decimalFormat = new DecimalFormat("#.00");
-            return decimalFormat.format(t1Prog) + " % filled";
-
-        } catch(Exception e){
-
-            return "No Data Found";
-
-        }
-
-    }
-
-    private String CalculateTankTwo(String tankTwoInfo, double HEIGHT){
-
-        try{
-
-            double t2 = Double.parseDouble(tankTwoInfo);
-            double t2Prog = ((t2 / HEIGHT) * 100);
-
-            DecimalFormat decimalFormat = new DecimalFormat("#.00");
-            return decimalFormat.format(t2Prog) + " % filled";
-
-        } catch(Exception e){
-
-            return "No Data Found";
-
-        }
 
     }
 
     // refreshes the data when the activity is active every 5 seconds
     Handler h = new Handler();
     Runnable r;
-    int delay = 1000 * 5; // time delay
+    int delay = 1000 * 1; // time delay
 
     @Override
     protected void onResume(){ // when the activity is active refresh every x seconds
@@ -163,7 +140,7 @@ public class MoreDetails extends AppCompatActivity {
         h.postDelayed(r = new Runnable() {
             @Override
             public void run() {
-                getDetails();
+                //getDetails();
                 h.postDelayed(r, delay);
             }
         }, delay);
