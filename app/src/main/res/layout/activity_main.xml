@@ -8,7 +8,7 @@
     tools:context=".MainActivity">
 
     <ToggleButton
-        android:id="@+id/motorToggle"
+        android:id="@+id/pumpToggle"
         android:layout_width="0dp"
         android:layout_height="80dp"
         android:layout_marginStart="20dp"
@@ -19,12 +19,13 @@
         android:text="ToggleButton"
         android:textAllCaps="false"
         android:textColor="@drawable/toggle_color"
-        android:textOff="Motor Off"
-        android:textOn="Motor On"
+        android:textOff="Pump Off"
+        android:textOn="Pump On"
         android:textSize="24sp"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/valveToggle"
+        app:layout_constraintHorizontal_bias="0.6"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ToggleButton
@@ -45,7 +46,7 @@
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/motorToggle" />
+        app:layout_constraintStart_toEndOf="@+id/pumpToggle" />
 
     <!-- Temperature Sensor Cards -->
 
@@ -348,7 +349,7 @@
         app:cardBackgroundColor="@color/cardBackground"
         app:cardCornerRadius="0dp"
         app:cardElevation="10.0dp"
-        app:layout_constraintBottom_toTopOf="@+id/motorToggle"
+        app:layout_constraintBottom_toTopOf="@+id/pumpToggle"
         app:layout_constraintEnd_toStartOf="@+id/detail_card"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/power_card_view">

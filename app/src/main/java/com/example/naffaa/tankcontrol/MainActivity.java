@@ -35,17 +35,25 @@ public class MainActivity extends AppCompatActivity {
         // ensures the screen is always in portrait mode
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
+        InitializePump();
+        InitializeValve();
+
         GetSensorData(); // gets the data from ThingSpeak
         UpdateChannel(); // updates the data from ThingSpeak
     }
     
-    // URL of the ThingSpeak channel that the data is being sent to
-    String server_url =
+    // URL of the ThingSpeak channel for the sensor data, pump state, and value state
+    String sensor_server_url =
             "https://api.thingspeak.com/channels/544573/feeds.json?api_key=BAY5Y9HPFP6V3C6G&results=1";
+    String pump_state_url =
+            "https://api.thingspeak.com/channels/603121/fields/3.json?api_key=RREYB0QH84HAKNIZ&results=1";
+    String valve_state_url =
+            "https://api.thingspeak.com/channels/603121/fields/4.json?api_key=RREYB0QH84HAKNIZ&results=1";
 
     // sets the size of the array based on the amount of data that is being retrieved
     final int arraySize = 8;
 
+    // retreives data from a ThingSpeak channel that contains sensor information
     private void GetSensorData(){
         // formatting for numbers set the decimal to up to 2 places
         final DecimalFormat df = new DecimalFormat("0.0");
@@ -59,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
         final TextView powerTxt = findViewById(R.id.power_val);         // power value
 
         // create a new JSON object request that will be sent to the queue in the MySingleton class
-        JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.GET, server_url, (JSONObject) null,
+        JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.GET, sensor_server_url, (JSONObject) null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -123,6 +131,144 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    // reads the initial state of the pump on the system and sets the toggle button accordingly
+    private void InitializePump(){
+
+        final ToggleButton pump = findViewById(R.id.pumpToggle);
+
+        // create a new JSON object request that will be sent to the queue in the MySingleton class
+        JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.GET, pump_state_url, (JSONObject) null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        try
+                        {
+                            // iterate through the general object request to the JSON object that
+                            // is holding our values
+                            JSONArray outer = response.getJSONArray("feeds");
+                            JSONObject inner = outer.getJSONObject(0);
+
+                            // gets the state of the pump and sets the toggle button state
+                            String toggleState = inner.getString("field3");
+
+                            if(Integer.parseInt(toggleState) == 1) // if the pump is on keep it on initially
+                                pump.setChecked(true);
+                            else                                   // otherwise set the pump to off initially
+                                pump.setChecked(false);
+
+                        }
+                        catch (JSONException e) // catches json request errors
+                        {
+                            e.printStackTrace();
+                        }
+                        catch (NumberFormatException ex) // catches integer parse error
+                        {
+                            pump.setChecked(false); // if no number is detected leave the motor on the off state
+                        }
+
+                    }
+                }, new Response.ErrorListener(){
+            @Override
+            public void onErrorResponse(VolleyError error){
+
+                // if there is an error display "Connection Error" on the toast at the bottom of the screen
+                Toast.makeText(MainActivity.this, "Connection Error", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
+        // Add the JSON object request the the queue (located in the MySingleton class
+        MySingleton.getInstance(MainActivity.this).addToRequestQueue(objectRequest);
+
+    }
+
+    // reads the initial state of the pump on the system and sets the toggle button accordingly
+    private void InitializeValve(){
+
+        final ToggleButton valve = findViewById(R.id.valveToggle);
+
+        // create a new JSON object request that will be sent to the queue in the MySingleton class
+        JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.GET, valve_state_url, (JSONObject) null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        try
+                        {
+                            // iterate through the general object request to the JSON object that
+                            // is holding our values
+                            JSONArray outer = response.getJSONArray("feeds");
+                            JSONObject inner = outer.getJSONObject(0);
+
+                            // gets the state of the pump and sets the toggle button state
+                            String toggleState = inner.getString("field4");
+
+                            if(Integer.parseInt(toggleState) == 1) // if the pump is on keep it on initially
+                                valve.setChecked(true);
+                            else                                   // otherwise set the pump to off initially
+                                valve.setChecked(false);
+
+                        }
+                        catch (JSONException e) // catches json request errors
+                        {
+                            e.printStackTrace();
+                        }
+                        catch (NumberFormatException ex) // catches integer parse error
+                        {
+                            valve.setChecked(false); // if no number is detected leave the motor on the off state
+                        }
+
+                    }
+                }, new Response.ErrorListener(){
+            @Override
+            public void onErrorResponse(VolleyError error){
+
+                // if there is a connection error display "Connection Error" on the toast at the bottom of the screen
+                Toast.makeText(MainActivity.this, "Connection Error", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
+        // Add the JSON object request the the queue (located in the MySingleton class
+        MySingleton.getInstance(MainActivity.this).addToRequestQueue(objectRequest);
+
+    }
+
+    // call this method to update the ThingSpeak channel
+    private void UpdateChannel(){
+
+        // specified links used to update the status of both buttons on ThingSpeak
+        String bothOn  = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=1&field2=1";
+        String motorOn = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=1&field2=0";
+        String valveOn = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=0&field2=1";
+        String bothOff = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=0&field2=0";
+
+        // used to open ThingSpeak in order to refresh the status of the buttons
+        WebView updateChannel = findViewById(R.id.update);
+
+        // Buttons on the interface
+        ToggleButton mTog = findViewById(R.id.pumpToggle); // Motor control button
+        ToggleButton vTog = findViewById(R.id.valveToggle); // Value control button
+
+        if(mTog.isChecked() && vTog.isChecked()){
+            updateChannel.loadUrl(bothOn);
+        }
+        // if the motor button is switched on and the valve button is off, update the channel to ON and OFF (1 and 0)
+        if(mTog.isChecked() && !vTog.isChecked()){
+            updateChannel.loadUrl(motorOn);
+        }
+        // if the motor button is switched off and the valve button is on, update the channel to OFF and ON (0 and 1)
+        if(!mTog.isChecked() && vTog.isChecked()){
+            updateChannel.loadUrl(valveOn);
+        }
+        // if the motor button is switched off and the valve button is off, update the channel to OFF and OFF (0 and 0)
+        if(!mTog.isChecked() && !vTog.isChecked()){
+            updateChannel.loadUrl(bothOff);
+        }
+
+    }
+
     // refreshes the data every 5 seconds when the activity is showing
     Handler h = new Handler();
     Runnable r;
@@ -156,37 +302,4 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    // call this method to update the ThingSpeak channel
-    public void UpdateChannel(){
-
-        // specified links used to update the status of both buttons on ThingSpeak
-        String bothOn  = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=1&field2=1";
-        String motorOn = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=1&field2=0";
-        String valveOn = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=0&field2=1";
-        String bothOff = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=0&field2=0";
-
-        // used to open ThingSpeak in order to refresh the status of the buttons
-        WebView updateChannel = findViewById(R.id.update);
-
-        // Buttons on the interface
-        ToggleButton mTog = findViewById(R.id.motorToggle); // Motor control button
-        ToggleButton vTog = findViewById(R.id.valveToggle); // Value control button
-
-        if(mTog.isChecked() && vTog.isChecked()){
-            updateChannel.loadUrl(bothOn);
-        }
-        // if the motor button is switched on and the valve button is off, update the channel to ON and OFF (1 and 0)
-        if(mTog.isChecked() && !vTog.isChecked()){
-            updateChannel.loadUrl(motorOn);
-        }
-        // if the motor button is switched off and the valve button is on, update the channel to OFF and ON (0 and 1)
-        if(!mTog.isChecked() && vTog.isChecked()){
-            updateChannel.loadUrl(valveOn);
-        }
-        // if the motor button is switched off and the valve button is off, update the channel to OFF and OFF (0 and 0)
-        if(!mTog.isChecked() && !vTog.isChecked()){
-            updateChannel.loadUrl(bothOff);
-        }
-
-    }
 }
