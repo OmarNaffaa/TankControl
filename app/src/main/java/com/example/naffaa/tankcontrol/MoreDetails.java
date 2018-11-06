@@ -72,7 +72,7 @@ public class MoreDetails extends AppCompatActivity {
                             if(mDataSet[1] != "null"){ tankTwoProg.setText(CalculateTankTwo(mDataSet[1], HEIGHT)); }
                             else{ tankTwoProg.setText("No Data Found"); }
 
-                            DecimalFormat decimalFormat = new DecimalFormat("0.00");
+                            DecimalFormat decimalFormat = new DecimalFormat("#.00");
 
                             // Handles null values and formatting
                             double[] parsedVal = new double[SIZE];
@@ -123,7 +123,7 @@ public class MoreDetails extends AppCompatActivity {
             double t1 = Double.parseDouble(tankOneInfo);
             double t1Prog = ((t1 / HEIGHT) * 100);
 
-            DecimalFormat decimalFormat = new DecimalFormat("0.00");
+            DecimalFormat decimalFormat = new DecimalFormat("#.00");
             return decimalFormat.format(t1Prog) + " % filled";
 
         } catch(Exception e){
@@ -141,7 +141,7 @@ public class MoreDetails extends AppCompatActivity {
             double t2 = Double.parseDouble(tankTwoInfo);
             double t2Prog = ((t2 / HEIGHT) * 100);
 
-            DecimalFormat decimalFormat = new DecimalFormat("0.00");
+            DecimalFormat decimalFormat = new DecimalFormat("#.00");
             return decimalFormat.format(t2Prog) + " % filled";
 
         } catch(Exception e){

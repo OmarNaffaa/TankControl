@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
 
             amntOfSpace = (tankOnePcnt + tankTwoPcnt) / 2;
 
-            DecimalFormat decimalFormat = new DecimalFormat("0.00");
+            DecimalFormat decimalFormat = new DecimalFormat("#.00");
 
             return decimalFormat.format(amntOfSpace) + "% filled";
 
@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
             double b = Double.parseDouble(v);
             pwr = (a * b);
 
-            DecimalFormat decimalFormat = new DecimalFormat("0.00");
+            DecimalFormat decimalFormat = new DecimalFormat("#.00");
 
             return decimalFormat.format(pwr) + " W";
 
