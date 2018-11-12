@@ -23,6 +23,12 @@ import static java.lang.Math.round;
 
 public class MoreDetails extends AppCompatActivity {
 
+    // URL of the ThingSpeak channel (filled in onCreate method)
+    String server_url;
+
+    // sets the size of the array based on the amount of data that is being retrieved
+    final int SIZE = 4;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,15 +38,12 @@ public class MoreDetails extends AppCompatActivity {
         // ensures the screen is always in portrait mode
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
+        // get the url that was passed from the MainActivity
+        Bundle bundle = getIntent().getExtras();
+        server_url = bundle.getString("url");
+
         getDetails();
     }
-
-    // URL of the ThingSpeak channel that the data is being sent to
-    String server_url =
-            "https://api.thingspeak.com/channels/544573/feeds.json?api_key=BAY5Y9HPFP6V3C6G&results=1";
-
-    // sets the size of the array based on the amount of data that is being retrieved
-    final int SIZE = 4;
 
     private void getDetails(){
 
@@ -93,17 +96,32 @@ public class MoreDetails extends AppCompatActivity {
 
                             }
 
-                            // set the value for the percentage of the tank filled
-                            tankOneProg.setText(df.format(numDataSet[0]) + " % filled");
-                            tankTwoProg.setText(df.format(numDataSet[1]) + " % filled");
+                            String errorString = "No Data Found";
+                            // set the value for the percentage of the tank filled if data is found
+                            if(numDataSet[0] != errorValue) {
+                                tankOneProg.setText(df.format(numDataSet[0]) + " % filled");
+                                waterLvlOne.setText(df.format((numDataSet[0] / 100) * HEIGHT) + " cm");
+                            }
+                            else {
+                                tankOneProg.setText(errorString);
+                                waterLvlOne.setText(errorString);
+                            }
 
-                            // set the values for the height of each tank that is filled
-                            waterLvlOne.setText(df.format((numDataSet[0] / 100) * HEIGHT) + " cm");
-                            waterLvlTwo.setText(df.format((numDataSet[1] / 100) * HEIGHT) + " cm");
+                            if(numDataSet[1] != errorValue){
+                                tankTwoProg.setText(df.format(numDataSet[1]) + " % filled");
+                                waterLvlTwo.setText(df.format((numDataSet[1] / 100) * HEIGHT) + " cm");
+                            }
+                            else {
+                                tankTwoProg.setText(errorString);
+                                waterLvlTwo.setText(errorString);
+                            }
 
                             // set the value of the current and the voltage
-                            currentValue.setText(df.format(numDataSet[2]) + " A");
-                            voltageValue.setText(df.format(numDataSet[3]) + " V");
+                            if(numDataSet[2] != errorValue) currentValue.setText(df.format(numDataSet[2]) + " A");
+                            else currentValue.setText(errorString);
+
+                            if(numDataSet[3] != errorValue) voltageValue.setText(df.format(numDataSet[3]) + " V");
+                            else voltageValue.setText(errorString);
 
                             // set the value for the height of the tank
                             tankHeight.setText(df.format(HEIGHT) + " cm");

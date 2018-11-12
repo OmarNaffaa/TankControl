@@ -24,6 +24,23 @@ import java.text.DecimalFormat;
 
 public class MainActivity extends AppCompatActivity {
 
+    // URL of the ThingSpeak channel for the sensor data, pump state, and value state
+    String sensor_server_url =
+            "https://api.thingspeak.com/channels/544573/feeds.json?api_key=BAY5Y9HPFP6V3C6G&results=1";
+    String pump_state_url =
+            "https://api.thingspeak.com/channels/603121/fields/3.json?api_key=RREYB0QH84HAKNIZ&results=1";
+    String valve_state_url =
+            "https://api.thingspeak.com/channels/603121/fields/4.json?api_key=RREYB0QH84HAKNIZ&results=1";
+
+    // specified links used to update the status of both buttons on ThingSpeak (used in UpdateChannel method)
+    String bothOn  = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=1&field2=1";
+    String motorOn = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=1&field2=0";
+    String valveOn = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=0&field2=1";
+    String bothOff = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=0&field2=0";
+
+    // sets the size of the array based on the amount of data that is being retrieved
+    final int arraySize = 8;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -35,23 +52,22 @@ public class MainActivity extends AppCompatActivity {
         // ensures the screen is always in portrait mode
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        InitializePump();
-        InitializeValve();
+        // get the pin that was passed from the MainActivity
+        Bundle bundle = getIntent().getExtras();
+        String PIN = bundle.getString("pin");
 
+        if (PIN.length() % 2 == 0) { // if an 4 digit pin is entered remove access to the buttons
+            pump_state_url = "";
+            valve_state_url = "";
+            bothOn = "";           valveOn = "";
+            bothOff = "";          motorOn = "";
+        }
+
+        InitializeValve();
+        InitializePump();
         GetSensorData(); // gets the data from ThingSpeak
         UpdateChannel(); // updates the data from ThingSpeak
     }
-    
-    // URL of the ThingSpeak channel for the sensor data, pump state, and value state
-    String sensor_server_url =
-            "https://api.thingspeak.com/channels/544573/feeds.json?api_key=BAY5Y9HPFP6V3C6G&results=1";
-    String pump_state_url =
-            "https://api.thingspeak.com/channels/603121/fields/3.json?api_key=RREYB0QH84HAKNIZ&results=1";
-    String valve_state_url =
-            "https://api.thingspeak.com/channels/603121/fields/4.json?api_key=RREYB0QH84HAKNIZ&results=1";
-
-    // sets the size of the array based on the amount of data that is being retrieved
-    final int arraySize = 8;
 
     // retreives data from a ThingSpeak channel that contains sensor information
     private void GetSensorData(){
@@ -103,12 +119,25 @@ public class MainActivity extends AppCompatActivity {
 
                             }
 
-                            tempTxt.setText(df.format(floatValues[0]) + " \u00b0C"); // set the temperature
-                            condTxt.setText(df.format(floatValues[1]) + " S"); // set the conductivity
-                            flowTxt.setText(df.format(floatValues[2]) + " L / min"); // set flow rate
-                            pressureTxt.setText(df.format(floatValues[7]) + " psi");
-                            capUsed.setText(df.format((floatValues[3] + floatValues[4]) / 2) + " % full");
-                            powerTxt.setText(df.format(floatValues[5] * floatValues[6]) + " W");
+                            String errorString = "No Data Found";
+                            // sets views with appropriate data
+                            if(floatValues[0] != errorValue) tempTxt.setText(df.format(floatValues[0]) + " \u00b0C");
+                            else tempTxt.setText(errorString);
+
+                            if(floatValues[1] != errorValue) condTxt.setText(df.format(floatValues[1]) + " S");
+                            else condTxt.setText(errorString);
+
+                            if(floatValues[2] != errorValue) flowTxt.setText(df.format(floatValues[2]) + " L / min");
+                            else flowTxt.setText(errorString);
+
+                            if(floatValues[3] != errorValue && floatValues[4] != errorValue) capUsed.setText(df.format((floatValues[3] + floatValues[4]) / 2) + " % full");
+                            else capUsed.setText(errorString);
+
+                            if(floatValues[5] != errorValue && floatValues[6] != errorValue) powerTxt.setText(df.format(floatValues[5] * floatValues[6]) + " W");
+                            else powerTxt.setText(errorString);
+
+                            if(floatValues[7] != errorValue) pressureTxt.setText(df.format(floatValues[7]) + " psi");
+                            else pressureTxt.setText(errorString);
 
                         }
                         catch (JSONException e) // catches errors
@@ -238,12 +267,6 @@ public class MainActivity extends AppCompatActivity {
     // call this method to update the ThingSpeak channel
     private void UpdateChannel(){
 
-        // specified links used to update the status of both buttons on ThingSpeak
-        String bothOn  = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=1&field2=1";
-        String motorOn = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=1&field2=0";
-        String valveOn = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=0&field2=1";
-        String bothOff = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=0&field2=0";
-
         // used to open ThingSpeak in order to refresh the status of the buttons
         WebView updateChannel = findViewById(R.id.update);
 
@@ -299,6 +322,11 @@ public class MainActivity extends AppCompatActivity {
     // in the XML sheet
     public void Details(View v) {
         Intent intent = new Intent(MainActivity.this, MoreDetails.class);
+
+        Bundle bundle = new Bundle(); // create the bundle
+        bundle.putString("url", sensor_server_url); // add ThingSpeak URL
+        intent.putExtras(bundle); // pass the variable to the main activity
+
         startActivity(intent);
     }
 
