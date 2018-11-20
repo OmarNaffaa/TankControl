@@ -37,7 +37,7 @@ public class Welcome_Screen extends AppCompatActivity {
         Button passListener = findViewById(R.id.enterPass); // button object on welcome screen
         final EditText password = findViewById(R.id.password); // textbox for entering a password
 
-        final String[] validPIN = {"12368", "2148"};
+        final String[] validPIN = {"12368", "1234"};
 
         passListener.setOnClickListener(new View.OnClickListener() { // when the button is pushed
             int attemptsUsed = 0; // gives the user 5 tries to enter a password

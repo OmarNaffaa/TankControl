@@ -54,19 +54,36 @@ public class MainActivity extends AppCompatActivity {
 
         // get the pin that was passed from the MainActivity
         Bundle bundle = getIntent().getExtras();
-        String PIN = bundle.getString("pin");
+        String pin = bundle.getString("pin");
+
+        DisableButtons(pin); // deny button access to users with lower access pin
+
+        InitializeValve();
+        InitializePump();
+        GetSensorData(); // gets the data from ThingSpeak
+        UpdateChannel(); // updates the data from ThingSpeak
+    }
+
+    // disables the button connection to ThingSpeak
+    private void DisableButtons(String PIN){
+
+        ToggleButton vTOG = findViewById(R.id.valveToggle);
+        ToggleButton pTOG = findViewById(R.id.pumpToggle);
 
         if (PIN.length() % 2 == 0) { // if an 4 digit pin is entered remove access to the buttons
             pump_state_url = "";
             valve_state_url = "";
             bothOn = "";           valveOn = "";
             bothOff = "";          motorOn = "";
+
+            vTOG.setVisibility(View.GONE); // remove button objects from layout
+            pTOG.setVisibility(View.GONE);
+
+            // disable URL links that upload button states to ThingSpeak
+            bothOff = "";          bothOn = "";
+            valveOn = "";          motorOn = "";
         }
 
-        InitializeValve();
-        InitializePump();
-        GetSensorData(); // gets the data from ThingSpeak
-        UpdateChannel(); // updates the data from ThingSpeak
     }
 
     // retreives data from a ThingSpeak channel that contains sensor information
@@ -149,8 +166,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error){
 
-                // if there is an error display "Connection Error" on the toast at the bottom of the screen
-                Toast.makeText(MainActivity.this, "Connection Error", Toast.LENGTH_SHORT).show();
+                // if there is an error display "Attempting to reconnect..." on the toast at the bottom of the screen
+                Toast.makeText(MainActivity.this, "Attempting to reconnect...", Toast.LENGTH_SHORT).show();
 
             }
         });
@@ -201,9 +218,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error){
 
-                // if there is an error display "Connection Error" on the toast at the bottom of the screen
-                Toast.makeText(MainActivity.this, "Connection Error", Toast.LENGTH_SHORT).show();
-
+                // if there is an error display "Attempting to reconnect..." on the toast at the bottom of the screen
+                if(pump_state_url != "") { // if the URL is disabled
+                    Toast.makeText(MainActivity.this, "Attempting to reconnect...", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -253,9 +271,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error){
 
-                // if there is a connection error display "Connection Error" on the toast at the bottom of the screen
-                Toast.makeText(MainActivity.this, "Connection Error", Toast.LENGTH_SHORT).show();
-
+                // if there is a connection error display "Attempting to reconnect..." on the toast at the bottom of the screen
+                if(valve_state_url != "") {
+                    Toast.makeText(MainActivity.this, "Attempting to reconnect...", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
