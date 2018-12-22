@@ -33,38 +33,27 @@ public class Welcome_Screen extends AppCompatActivity {
         setContentView(R.layout.activity_welcome__screen);
 
         getSupportActionBar().hide();
+        OpeningLauncher openingLauncher = new OpeningLauncher();
+        openingLauncher.start();
 
-        Button passListener = findViewById(R.id.enterPass); // button object on welcome screen
-        final EditText password = findViewById(R.id.password); // textbox for entering a password
+    }
 
-        final String[] validPIN = {"12368", "1234"};
+    private static int SCREEN_TIMEOUT = 3; // 3 second timer for opening screen
 
-        passListener.setOnClickListener(new View.OnClickListener() { // when the button is pushed
-            int attemptsUsed = 0; // gives the user 5 tries to enter a password
-
-            public void onClick(View v) {
-
-                String PIN = password.getText().toString(); // parse the number the user entered
-
-                for (int i = 0; i < validPIN.length; i++) { // iterates through list of valid PINs to validate
-
-                    if (PIN.equals(validPIN[i])) { // if the entered PIN is valid and the master pin, enter the app
-                        Intent intent = new Intent(Welcome_Screen.this, MainActivity.class);
-
-                        Bundle bundle = new Bundle(); // create the bundle
-                        bundle.putString("pin", PIN); // add the valid PIN
-                        intent.putExtras(bundle); // pass the variable to the main activity
-
-                        startActivity(intent);
-                        Welcome_Screen.this.finish();
-                    }
-                    if (!PIN.equals(validPIN[i])) {
-                        password.setText(""); // clear the attempted password
-                    }
-
-                }
+    private class OpeningLauncher extends Thread{
+        public void run(){
+            try{
+                sleep(SCREEN_TIMEOUT * 1000);
+            } catch(InterruptedException e){
+                e.printStackTrace();
             }
-        });
+
+
+            Intent intent = new Intent(Welcome_Screen.this, MainActivity.class);
+            startActivity(intent);
+            Welcome_Screen.this.finish();
+        }
+
     }
 }
 

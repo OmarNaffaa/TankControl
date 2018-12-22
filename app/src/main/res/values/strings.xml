@@ -16,4 +16,9 @@
     <string name="secondTank">Tank 2</string>
     <string name="additionalInfo">Water Level Information</string>
     <string name="maxHeight">Height of Tank</string>
+    <string name="header">Drowt 2.0 Information</string>
+    <string name="controls">Controls</string>
+    <string name="pvHeader">Pump / Valve Control</string>
+    <string name="flowPwr">Pump Power</string>
+    <string name="addSys">System Select</string>
 </resources>
