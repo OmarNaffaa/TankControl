@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/parent_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/card_one"
+        android:layout_width="0dp"
+        android:layout_height="85dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        app:cardBackgroundColor="@color/cardBackground"
+        app:cardElevation="10.0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/card_two"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/genericTitle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/roboto_slab_bold"
+            android:gravity="center"
+            android:text="TITLE"
+            android:textAlignment="center"
+            android:textColor="@color/cardText"
+            android:textSize="24sp" />
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/card_two"
+        android:layout_width="0dp"
+        android:layout_height="85dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="10dp"
+        app:cardBackgroundColor="@color/dataCardBackground"
+        app:cardElevation="5.0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/card_one"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/genericText"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/eczar_medium"
+            android:gravity="center"
+            android:text="DATA"
+            android:textAlignment="center"
+            android:textColor="@color/colorAccent"
+            android:textSize="24sp" />
+    </android.support.v7.widget.CardView>
+</android.support.constraint.ConstraintLayout>
