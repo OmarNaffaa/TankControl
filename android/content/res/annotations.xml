@@ -1,0 +1,5 @@
+<root>
+    <item name='android.content.res.Resources android.graphics.Typeface getFont(int)'>
+        <annotation name='java.lang.Deprecated' />
+    </item>
+</root>
