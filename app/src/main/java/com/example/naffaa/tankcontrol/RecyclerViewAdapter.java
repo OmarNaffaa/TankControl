@@ -26,22 +26,35 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         this.mContext = mContext;
     }
 
+    // constructor used for the system select recycler view
+    public RecyclerViewAdapter(@NonNull ArrayList<String> mTitles, Context mContext){
+        this.mTitles = mTitles;
+        this.mContext = mContext;
+    }
+
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.layout_listitem, viewGroup, false);
+        View view;
+
+        if(!mData.isEmpty()){
+            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.layout_listitem, viewGroup, false);
+        } else {
+            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.system_listview, viewGroup, false);
+        }
+
         ViewHolder holder = new ViewHolder(view);
         return holder;
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-        viewHolder.dataText.setText(mData.get(i));
+        if(!mData.isEmpty()) viewHolder.dataText.setText(mData.get(i));
         viewHolder.titleText.setText(mTitles.get(i));
     }
 
     @Override
     public int getItemCount() {
-        return mData.size();
+        return mTitles.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

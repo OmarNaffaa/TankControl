@@ -1,16 +1,10 @@
 package com.example.naffaa.tankcontrol;
 
-import android.content.pm.ActivityInfo;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.view.WindowManager;
 import android.webkit.WebView;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -22,27 +16,16 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
-import java.util.ArrayList;
-
-public class ControlActivity extends AppCompatActivity {
+public class ControlActivity extends AppCompatActivity implements Lists{
 
     // URLs that hold the data for the valve and pump buttons
-    String pump_state_url =
-            "https://api.thingspeak.com/channels/603121/fields/3.json?api_key=RREYB0QH84HAKNIZ&results=1";
-    String valve_state_url =
-            "https://api.thingspeak.com/channels/603121/fields/4.json?api_key=RREYB0QH84HAKNIZ&results=1";
-
-    // specified links used to update the status of both buttons on ThingSpeak (used in UpdateChannel method)
-    String bothOn  = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=1&field2=1";
-    String motorOn = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=1&field2=0";
-    String valveOn = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=0&field2=1";
-    String bothOff = "https://api.thingspeak.com/update.json?api_key=M3MIFBPFS6YFA3GZ&field1=0&field2=0";
-
-    // arrays used to hold the titles and system keys
-    ArrayList<String> mNames = new ArrayList<>();
-    ArrayList<String> mSystems = new ArrayList<>();
+    String pump_state_url;
+    String valve_state_url;
+    String bothOn;
+    String motorOn;
+    String valveOn;
+    String bothOff;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,31 +33,22 @@ public class ControlActivity extends AppCompatActivity {
         setContentView(R.layout.activity_control);
         getSupportActionBar().hide();
 
-        // stops the keyboard from appearing on activity startup
-        // and keeps the UI static when the keyboard appears
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
-
-        // ensures the screen is always in portrait mode
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        // initialize links used to interface buttons upon activity creation
+        pump_state_url = "https://api.thingspeak.com/channels/603121/fields/1.json?api_key=" + mButtonRead.get(0) + "&results=1";
+        valve_state_url = "https://api.thingspeak.com/channels/603121/fields/2.json?api_key=" + mButtonRead.get(0) + "&results=1";
+        bothOn = "https://api.thingspeak.com/update.json?api_key=" + mButtonWrite.get(0) + "&field1=1&field2=1";
+        bothOff = "https://api.thingspeak.com/update.json?api_key=" + mButtonWrite.get(0);                        // OFF = null
+        motorOn = "https://api.thingspeak.com/update.json?api_key=" + mButtonWrite.get(0) + "&field1=1";
+        valveOn = "https://api.thingspeak.com/update.json?api_key=" + mButtonWrite.get(0) + "&field2=1";
 
         // initialize the state of the pump and valve
-        InitializePump();
         InitializeValve();
+        InitializePump();
 
-        // if either button is clicked, the new status will be written to
-        // ThingSpeak
+        // if either button is clicked, the new status will be written to ThingSpeak
         ToggleButton valveCheck = findViewById(R.id.valveToggle);
         ToggleButton pumpCheck = findViewById(R.id.pumpToggle);
 
-        pumpCheck.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                UpdateChannel();
-            }
-        });
         valveCheck.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -83,49 +57,14 @@ public class ControlActivity extends AppCompatActivity {
                 UpdateChannel();
             }
         });
-
-        mNames.add("default system");
-        mSystems.add("default key");
-        RefreshSystems();
-
-        // call the "AddSystems" method when the "ADD" button is pressed
-        // which will add a system key and title to the lists and refresh the view
-        Button add = findViewById(R.id.addKey);
-
-        add.setOnClickListener(new View.OnClickListener() {
+        pumpCheck.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View view) {
-
-                AddSystems();
-
+            public void onClick(View v)
+            {
+                UpdateChannel();
             }
         });
-    }
-
-    private void AddSystems(){
-
-        TextView info = findViewById(R.id.enterKey);
-
-        String temp = info.getText().toString();
-        int comma = temp.indexOf(',');
-
-        if(temp.contains(",")) {
-            mNames.add(temp.substring(0, comma)); // add the title if there is a name
-            mSystems.add(temp.substring(comma + 1)); // add the system key
-        } else {
-            mNames.add(" "); // add a placeholder for the title
-            mSystems.add(temp); // add the system key
-        }
-
-        RefreshSystems();
-    }
-
-    private void RefreshSystems() {
-
-        RecyclerView recyclerView = findViewById(R.id.recycleView);
-        RecyclerViewAdapter recyclerViewAdapter = new RecyclerViewAdapter(mNames, mSystems, this);
-        recyclerView.setAdapter(recyclerViewAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
     }
 
@@ -148,21 +87,19 @@ public class ControlActivity extends AppCompatActivity {
                             JSONObject inner = outer.getJSONObject(0);
 
                             // gets the state of the pump and sets the toggle button state
-                            String toggleState = inner.getString("field3");
+                            String toggleState = inner.getString("field1");
 
-                            if(Integer.parseInt(toggleState) == 1) // if the pump is on keep it on initially
+                            if(toggleState.contains("1")) {   // if the pump is on keep it on initially
                                 pump.setChecked(true);
-                            else                                   // otherwise set the pump to off initially
+
+                            } else {                      // otherwise set the pump to off initially
                                 pump.setChecked(false);
+                            }
 
                         }
                         catch (JSONException e) // catches json request errors
                         {
                             e.printStackTrace();
-                        }
-                        catch (NumberFormatException ex) // catches integer parse error
-                        {
-                            pump.setChecked(false); // if no number is detected leave the motor on the off state
                         }
 
                     }
@@ -171,7 +108,7 @@ public class ControlActivity extends AppCompatActivity {
             public void onErrorResponse(VolleyError error){
 
                 // if there is an error display "Attempting to reconnect..." on the toast at the bottom of the screen
-                if(pump_state_url != "") { // if the URL is disabled
+                if(!mButtonRead.isEmpty()) { // if the URL is not disabled but there are still connection issues
                     Toast.makeText(ControlActivity.this, "Attempting to reconnect...", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -201,21 +138,18 @@ public class ControlActivity extends AppCompatActivity {
                             JSONObject inner = outer.getJSONObject(0);
 
                             // gets the state of the pump and sets the toggle button state
-                            String toggleState = inner.getString("field4");
+                            String toggleState = inner.getString("field2");
 
-                            if(Integer.parseInt(toggleState) == 1) // if the pump is on keep it on initially
+                            if(toggleState.contains("1")) { // if the pump is on keep it on initially
                                 valve.setChecked(true);
-                            else                                   // otherwise set the pump to off initially
+                            } else { // otherwise set the pump to off initially
                                 valve.setChecked(false);
+                            }
 
                         }
                         catch (JSONException e) // catches json request errors
                         {
                             e.printStackTrace();
-                        }
-                        catch (NumberFormatException ex) // catches integer parse error
-                        {
-                            valve.setChecked(false); // if no number is detected leave the motor on the off state
                         }
 
                     }
@@ -224,7 +158,7 @@ public class ControlActivity extends AppCompatActivity {
             public void onErrorResponse(VolleyError error){
 
                 // if there is a connection error display "Attempting to reconnect..." on the toast at the bottom of the screen
-                if(valve_state_url != "") {
+                if(!mButtonRead.isEmpty()) { // if the URL is not disabled but there are still connection issues
                     Toast.makeText(ControlActivity.this, "Attempting to reconnect...", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -263,19 +197,19 @@ public class ControlActivity extends AppCompatActivity {
 
     }
 
-    // refreshes the data every 5 seconds when the activity is showing
+    // refreshes the data when the activity is showing
     Handler h = new Handler();
     Runnable r;
-    int delay = 1000 * 5; // 5 second delay for data pull requests
+    int delay = (int) (1000 * 0.5); // 1 second second delay for data pull requests
 
     @Override
-    protected void onResume(){ // when the activity is active refresh every 5 seconds
+    protected void onResume(){
 
         h.postDelayed(r = new Runnable() {
             @Override
-            public void run() {   // continually check the state of the pump and valve
-                InitializePump(); // to keep multiple devices in sync
+            public void run() {
                 InitializeValve();
+                InitializePump();
                 h.postDelayed(r, delay);
             }
         }, delay);
@@ -284,7 +218,7 @@ public class ControlActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause(){ // if the activity isn't active stop calling getData
+    protected void onPause(){ // if the activity isn't active stop making ThingSpeak requests
         h.removeCallbacks(r);
         super.onPause();
     }

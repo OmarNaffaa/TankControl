@@ -1,5 +1,6 @@
 package com.example.naffaa.tankcontrol;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
@@ -14,12 +15,16 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
 /* This class handles the welcome screen when the app is opened.
    Everything in this class is for the appearance of the app when
    it is opened up, which means nothing in here affects the functionality
    of the program.
  */
-public class Welcome_Screen extends AppCompatActivity {
+public class Welcome_Screen extends AppCompatActivity implements Lists{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +38,7 @@ public class Welcome_Screen extends AppCompatActivity {
         setContentView(R.layout.activity_welcome__screen);
 
         getSupportActionBar().hide();
+
         OpeningLauncher openingLauncher = new OpeningLauncher();
         openingLauncher.start();
 
@@ -48,7 +54,6 @@ public class Welcome_Screen extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-
             Intent intent = new Intent(Welcome_Screen.this, MainActivity.class);
             startActivity(intent);
             Welcome_Screen.this.finish();
@@ -56,4 +61,3 @@ public class Welcome_Screen extends AppCompatActivity {
 
     }
 }
-
