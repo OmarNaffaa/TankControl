@@ -1,10 +1,14 @@
 package com.example.naffaa.tankcontrol;
 
+import android.content.pm.ActivityInfo;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebView;
+import android.widget.Button;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -22,10 +26,9 @@ public class ControlActivity extends AppCompatActivity implements Lists{
     // URLs that hold the data for the valve and pump buttons
     String pump_state_url;
     String valve_state_url;
-    String bothOn;
-    String motorOn;
-    String valveOn;
-    String bothOff;
+    String bar_state_url;
+    String read_url;
+    String update_url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,22 +36,36 @@ public class ControlActivity extends AppCompatActivity implements Lists{
         setContentView(R.layout.activity_control);
         getSupportActionBar().hide();
 
+        // Ensures the screen is always in portrait mode
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         // initialize links used to interface buttons upon activity creation
         pump_state_url = "https://api.thingspeak.com/channels/603121/fields/1.json?api_key=" + mButtonRead.get(0) + "&results=1";
         valve_state_url = "https://api.thingspeak.com/channels/603121/fields/2.json?api_key=" + mButtonRead.get(0) + "&results=1";
+        bar_state_url = "https://api.thingspeak.com/channels/603121/fields/3.json?api_key=" + mButtonRead.get(0) + "&results=1";
+        read_url = "https://api.thingspeak.com/channels/603121/feeds.json?api_key=" + mButtonRead.get(0) + "&results=1";
+
+        /*
         bothOn = "https://api.thingspeak.com/update.json?api_key=" + mButtonWrite.get(0) + "&field1=1&field2=1";
         bothOff = "https://api.thingspeak.com/update.json?api_key=" + mButtonWrite.get(0);                        // OFF = null
         motorOn = "https://api.thingspeak.com/update.json?api_key=" + mButtonWrite.get(0) + "&field1=1";
         valveOn = "https://api.thingspeak.com/update.json?api_key=" + mButtonWrite.get(0) + "&field2=1";
+         */
 
-        // initialize the state of the pump and valve
+        // initialize the state of the pump, valve, and flow meter power
         InitializeValve();
         InitializePump();
+        InitializePower();
 
         // if either button is clicked, the new status will be written to ThingSpeak
         ToggleButton valveCheck = findViewById(R.id.valveToggle);
         ToggleButton pumpCheck = findViewById(R.id.pumpToggle);
 
+        // button and seekbar that will send the selected power ratio to the system
+        Button confirmPower = findViewById(R.id.confirmPwr);
+        SeekBar powerBar = findViewById(R.id.powerSeekBar);
+
+        // listeners that call a method to perform an action once pressed
         valveCheck.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -65,7 +82,90 @@ public class ControlActivity extends AppCompatActivity implements Lists{
                 UpdateChannel();
             }
         });
+        confirmPower.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v){
+                UpdateChannel();
+            }
+        });
+        powerBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                TextView powerRatio = findViewById(R.id.updateVolt);
+                powerRatio.setText(progress * 10 + "%");
+            }
 
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // not currently necessary
+                // would be used when the user first touches the seekbar to move it
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // not currently necessary
+                // would be used when the user stops moving the seekbar
+            }
+        });
+
+    }
+
+    // reads the initial power ratio from the system and sets the interface accordingly
+    String prevPowerValue;
+    int powerInit = 0;
+    private void InitializePower() {
+        // create a new JSON object request that will be sent to the queue in the MySingleton class
+        JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.GET, bar_state_url, (JSONObject) null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        try
+                        {
+                            SeekBar powerSeekBar = findViewById(R.id.powerSeekBar);
+                            TextView powerView = findViewById(R.id.updateVolt);
+
+                            // iterate through the general object request to the JSON object that
+                            // is holding our values
+                            JSONArray outer = response.getJSONArray("feeds");
+                            JSONObject inner = outer.getJSONObject(0);
+                            String powerState = inner.getString("field3");
+
+                            // changes the value of the seekbar and percentage box
+                            // if a different user updated the value
+                            if(!powerState.equals(prevPowerValue)){
+                                powerView.setText(powerState + "0%");
+                                powerSeekBar.setProgress(Integer.parseInt(powerState), true);
+                                prevPowerValue = powerState;
+                            }
+
+                            // sets the initial value of the seekbar and percentage box
+                            if(powerInit == 0){
+                                powerView.setText(powerState + "0%");
+                                prevPowerValue = inner.getString("field3");
+                                powerInit++;
+                            }
+                        }
+                        catch (JSONException e) // catches json request errors
+                        {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener(){
+            @Override
+            public void onErrorResponse(VolleyError error){
+
+                // if there is a connection error display "Attempting to reconnect..." on the toast at the bottom of the screen
+                if(!mButtonRead.isEmpty()) { // if the URL is not disabled but there are still connection issues
+                    Toast.makeText(ControlActivity.this, "Attempting to reconnect...", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        // Add the JSON object request the the queue (located in the MySingleton class
+        MySingleton.getInstance(ControlActivity.this).addToRequestQueue(objectRequest);
     }
 
     // reads the initial state of the pump on the system and sets the toggle button accordingly
@@ -170,37 +270,35 @@ public class ControlActivity extends AppCompatActivity implements Lists{
     }
 
     // call this method to update the ThingSpeak channel
+    String one, two, three;
     private void UpdateChannel(){
 
         // used to open ThingSpeak in order to refresh the status of the buttons
         WebView updateChannel = findViewById(R.id.update);
 
-        // Buttons on the interface
+        update_url = "https://api.thingspeak.com/update.json?api_key=" + mButtonWrite.get(0) +
+                      "&field1=" + one + "&field2=" + two + "&field3=" +  three;
+
         ToggleButton mTog = findViewById(R.id.pumpToggle); // Motor control button
         ToggleButton vTog = findViewById(R.id.valveToggle); // Value control button
+        TextView pwrVal = findViewById(R.id.updateVolt); // power percentage
 
-        if(mTog.isChecked() && vTog.isChecked()){
-            updateChannel.loadUrl(bothOn);
-        }
-        // if the motor button is switched on and the valve button is off, update the channel to ON and OFF (1 and 0)
-        if(mTog.isChecked() && !vTog.isChecked()){
-            updateChannel.loadUrl(motorOn);
-        }
-        // if the motor button is switched off and the valve button is on, update the channel to OFF and ON (0 and 1)
-        if(!mTog.isChecked() && vTog.isChecked()){
-            updateChannel.loadUrl(valveOn);
-        }
-        // if the motor button is switched off and the valve button is off, update the channel to OFF and OFF (0 and 0)
-        if(!mTog.isChecked() && !vTog.isChecked()){
-            updateChannel.loadUrl(bothOff);
-        }
+        if(mTog.isChecked())
+            one = "1";
+        if(vTog.isChecked())
+            two = "1";
 
+        // get the first digit of the percentage and upload to ThingSpeak
+        // (for microcontroller: divide this digit by 10 to get the ratio)
+        three = pwrVal.getText().toString().charAt(0) + "";
+
+        updateChannel.loadUrl(update_url);
     }
 
     // refreshes the data when the activity is showing
     Handler h = new Handler();
     Runnable r;
-    int delay = (int) (1000 * 0.5); // 1 second second delay for data pull requests
+    int delay = (int) (1000 * 1); // 1 second second delay for data pull requests
 
     @Override
     protected void onResume(){
@@ -210,6 +308,7 @@ public class ControlActivity extends AppCompatActivity implements Lists{
             public void run() {
                 InitializeValve();
                 InitializePump();
+                InitializePower();
                 h.postDelayed(r, delay);
             }
         }, delay);

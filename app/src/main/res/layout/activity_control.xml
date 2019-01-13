@@ -7,33 +7,22 @@
     tools:context=".ControlActivity">
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/updateVolt"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
-        android:layout_marginEnd="20dp"
         android:fontFamily="@font/eczar_medium"
-        android:text="0.00 V"
+        android:gravity="center_vertical"
+        android:text="0%"
         android:textAlignment="center"
         android:textColor="@color/colorAccent"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        android:textSize="30sp"
+        app:layout_constraintEnd_toStartOf="@+id/confirmPwr"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_chainStyle="spread"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/pumpPowerHeader" />
-
-    <SeekBar
-        android:id="@+id/seekBar"
-        android:layout_width="0dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="20dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <android.support.v7.widget.CardView
         android:id="@+id/pumpPowerHeader"
@@ -114,13 +103,13 @@
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="40dp"
         android:layout_marginEnd="20dp"
         app:cardCornerRadius="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/seekBar">
+        app:layout_constraintTop_toBottomOf="@+id/powerSeekBar">
 
         <TextView
             android:id="@+id/headerPV"
@@ -132,6 +121,34 @@
             android:textColor="@color/cardText"
             android:textSize="30sp" />
     </android.support.v7.widget.CardView>
+
+    <SeekBar
+        android:id="@+id/powerSeekBar"
+        style="@style/Widget.AppCompat.SeekBar.Discrete"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:max="10"
+        android:progress="0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/updateVolt" />
+
+    <Button
+        android:id="@+id/confirmPwr"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:fontFamily="@font/eczar_medium"
+        android:text="Confirm"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/updateVolt"
+        app:layout_constraintTop_toBottomOf="@+id/pumpPowerHeader" />
 
 
 </android.support.constraint.ConstraintLayout>
