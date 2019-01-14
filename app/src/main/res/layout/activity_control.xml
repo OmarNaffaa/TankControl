@@ -65,6 +65,7 @@
         android:textOn="Valve On"
         android:textSize="24sp"
         android:visibility="visible"
+        android:onClick="UpdateChannel"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/pumpToggle"
         app:layout_constraintTop_toBottomOf="@+id/pump_valve_header" />
@@ -86,6 +87,7 @@
         android:textOn="Pump On"
         android:textSize="24sp"
         android:visibility="visible"
+        android:onClick="UpdateChannel"
         app:layout_constraintEnd_toStartOf="@+id/valveToggle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/pump_valve_header" />
@@ -145,10 +147,10 @@
         android:fontFamily="@font/eczar_medium"
         android:text="Confirm"
         android:textSize="18sp"
+        android:onClick="UpdateChannel"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/updateVolt"
         app:layout_constraintTop_toBottomOf="@+id/pumpPowerHeader" />
-
 
 </android.support.constraint.ConstraintLayout>

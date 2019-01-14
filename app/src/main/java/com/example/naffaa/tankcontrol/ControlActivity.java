@@ -45,50 +45,15 @@ public class ControlActivity extends AppCompatActivity implements Lists{
         bar_state_url = "https://api.thingspeak.com/channels/603121/fields/3.json?api_key=" + mButtonRead.get(0) + "&results=1";
         read_url = "https://api.thingspeak.com/channels/603121/feeds.json?api_key=" + mButtonRead.get(0) + "&results=1";
 
-        /*
-        bothOn = "https://api.thingspeak.com/update.json?api_key=" + mButtonWrite.get(0) + "&field1=1&field2=1";
-        bothOff = "https://api.thingspeak.com/update.json?api_key=" + mButtonWrite.get(0);                        // OFF = null
-        motorOn = "https://api.thingspeak.com/update.json?api_key=" + mButtonWrite.get(0) + "&field1=1";
-        valveOn = "https://api.thingspeak.com/update.json?api_key=" + mButtonWrite.get(0) + "&field2=1";
-         */
-
         // initialize the state of the pump, valve, and flow meter power
         InitializeValve();
         InitializePump();
         InitializePower();
 
-        // if either button is clicked, the new status will be written to ThingSpeak
-        ToggleButton valveCheck = findViewById(R.id.valveToggle);
-        ToggleButton pumpCheck = findViewById(R.id.pumpToggle);
-
-        // button and seekbar that will send the selected power ratio to the system
-        Button confirmPower = findViewById(R.id.confirmPwr);
+        // The two togglebuttons and the button event listeners are in the xml file
+        // seekbar that will send the selected power ratio to the system
         SeekBar powerBar = findViewById(R.id.powerSeekBar);
 
-        // listeners that call a method to perform an action once pressed
-        valveCheck.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                UpdateChannel();
-            }
-        });
-        pumpCheck.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                UpdateChannel();
-            }
-        });
-        confirmPower.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v){
-                UpdateChannel();
-            }
-        });
         powerBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -270,35 +235,43 @@ public class ControlActivity extends AppCompatActivity implements Lists{
     }
 
     // call this method to update the ThingSpeak channel
-    String one, two, three;
-    private void UpdateChannel(){
-
-        // used to open ThingSpeak in order to refresh the status of the buttons
-        WebView updateChannel = findViewById(R.id.update);
-
-        update_url = "https://api.thingspeak.com/update.json?api_key=" + mButtonWrite.get(0) +
-                      "&field1=" + one + "&field2=" + two + "&field3=" +  three;
+    public void UpdateChannel(View v){
+        String one, two, three;
 
         ToggleButton mTog = findViewById(R.id.pumpToggle); // Motor control button
-        ToggleButton vTog = findViewById(R.id.valveToggle); // Value control button
+        ToggleButton vTog = findViewById(R.id.valveToggle); // Valve control button
         TextView pwrVal = findViewById(R.id.updateVolt); // power percentage
 
         if(mTog.isChecked())
             one = "1";
+        else
+            one = "0";
+
         if(vTog.isChecked())
             two = "1";
+        else
+            two = "0";
 
         // get the first digit of the percentage and upload to ThingSpeak
         // (for microcontroller: divide this digit by 10 to get the ratio)
-        three = pwrVal.getText().toString().charAt(0) + "";
+        SeekBar skBr = findViewById(R.id.powerSeekBar);
+        int prog = skBr.getProgress();
+        three = prog + "";
 
+        update_url = "https://api.thingspeak.com/update.json?api_key=" + mButtonWrite.get(0) +
+                "&field1=" + one + "&field2=" + two + "&field3=" +  three;
+
+        Toast.makeText(ControlActivity.this, update_url, Toast.LENGTH_SHORT).show();
+
+        // used to open ThingSpeak in order to refresh the status of the buttons
+        WebView updateChannel = findViewById(R.id.update);
         updateChannel.loadUrl(update_url);
     }
 
     // refreshes the data when the activity is showing
-    Handler h = new Handler();
     Runnable r;
-    int delay = (int) (1000 * 1); // 1 second second delay for data pull requests
+    Handler h = new Handler();
+    int delay = (int) (1000 * 1); // 1 second delay for data pull requests
 
     @Override
     protected void onResume(){
@@ -309,7 +282,6 @@ public class ControlActivity extends AppCompatActivity implements Lists{
                 InitializeValve();
                 InitializePump();
                 InitializePower();
-                h.postDelayed(r, delay);
             }
         }, delay);
 
