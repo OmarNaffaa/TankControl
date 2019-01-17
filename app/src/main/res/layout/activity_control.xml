@@ -7,19 +7,51 @@
     tools:context=".ControlActivity">
 
     <TextView
+        android:id="@+id/sysPowerLvl"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
+        android:fontFamily="@font/eczar_medium"
+        android:gravity="center_vertical"
+        android:textAlignment="center"
+        android:textColor="@color/colorAccent"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/powerSeekBar" />
+
+    <Button
+        android:id="@+id/confirmPwr"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
+        android:fontFamily="@font/eczar_medium"
+        android:onClick="UpdateChannel"
+        android:text="Confirm"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sysPowerLvl" />
+
+    <TextView
         android:id="@+id/updateVolt"
         android:layout_width="0dp"
         android:layout_height="60dp"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
         android:fontFamily="@font/eczar_medium"
         android:gravity="center_vertical"
         android:text="0%"
         android:textAlignment="center"
         android:textColor="@color/colorAccent"
         android:textSize="30sp"
-        app:layout_constraintEnd_toStartOf="@+id/confirmPwr"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_chainStyle="spread"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/pumpPowerHeader" />
@@ -54,10 +86,11 @@
         android:layout_width="0dp"
         android:layout_height="60dp"
         android:layout_marginStart="5dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="20dp"
         android:checked="false"
         android:fontFamily="@font/eczar_medium"
+        android:onClick="UpdateChannel"
         android:text="ToggleButton"
         android:textAllCaps="false"
         android:textColor="@drawable/toggle_color"
@@ -65,7 +98,6 @@
         android:textOn="Valve On"
         android:textSize="24sp"
         android:visibility="visible"
-        android:onClick="UpdateChannel"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/pumpToggle"
         app:layout_constraintTop_toBottomOf="@+id/pump_valve_header" />
@@ -75,10 +107,11 @@
         android:layout_width="0dp"
         android:layout_height="60dp"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="5dp"
         android:checked="false"
         android:fontFamily="@font/eczar_medium"
+        android:onClick="UpdateChannel"
         android:text="ToggleButton"
         android:textAllCaps="false"
         android:textAppearance="@style/TextAppearance.AppCompat"
@@ -87,7 +120,6 @@
         android:textOn="Pump On"
         android:textSize="24sp"
         android:visibility="visible"
-        android:onClick="UpdateChannel"
         app:layout_constraintEnd_toStartOf="@+id/valveToggle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/pump_valve_header" />
@@ -105,13 +137,13 @@
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="28dp"
         android:layout_marginEnd="20dp"
         app:cardCornerRadius="10dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/powerSeekBar">
+        app:layout_constraintTop_toBottomOf="@+id/confirmPwr">
 
         <TextView
             android:id="@+id/headerPV"
@@ -130,27 +162,12 @@
         android:layout_width="0dp"
         android:layout_height="30dp"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="20dp"
         android:max="10"
         android:progress="0"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/updateVolt" />
-
-    <Button
-        android:id="@+id/confirmPwr"
-        android:layout_width="0dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="20dp"
-        android:fontFamily="@font/eczar_medium"
-        android:text="Confirm"
-        android:textSize="18sp"
-        android:onClick="UpdateChannel"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/updateVolt"
-        app:layout_constraintTop_toBottomOf="@+id/pumpPowerHeader" />
 
 </android.support.constraint.ConstraintLayout>

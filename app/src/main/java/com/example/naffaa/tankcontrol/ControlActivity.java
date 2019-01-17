@@ -1,7 +1,9 @@
 package com.example.naffaa.tankcontrol;
 
 import android.content.pm.ActivityInfo;
+import android.os.Build;
 import android.os.Handler;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -83,6 +85,7 @@ public class ControlActivity extends AppCompatActivity implements Lists{
         // create a new JSON object request that will be sent to the queue in the MySingleton class
         JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.GET, bar_state_url, (JSONObject) null,
                 new Response.Listener<JSONObject>() {
+                    @RequiresApi(api = Build.VERSION_CODES.N) // no effect, added annotation to remove warning statement
                     @Override
                     public void onResponse(JSONObject response) {
 
@@ -90,12 +93,24 @@ public class ControlActivity extends AppCompatActivity implements Lists{
                         {
                             SeekBar powerSeekBar = findViewById(R.id.powerSeekBar);
                             TextView powerView = findViewById(R.id.updateVolt);
+                            TextView tSpeakPower = findViewById(R.id.sysPowerLvl);
+
+                            int prog = powerSeekBar.getProgress();
+                            String displayedProg = prog + "";
 
                             // iterate through the general object request to the JSON object that
                             // is holding our values
                             JSONArray outer = response.getJSONArray("feeds");
                             JSONObject inner = outer.getJSONObject(0);
                             String powerState = inner.getString("field3");
+
+                            // if a null string is received, set it to an empty string instead
+                            if(powerState.contains("null")){
+                                powerState = "";
+                            }
+
+                            // set the textview that shows the power level stored on ThingSpeak
+                            tSpeakPower.setText("Current ThingSpeak Value: " + powerState + "0%");
 
                             // changes the value of the seekbar and percentage box
                             // if a different user updated the value
@@ -108,13 +123,17 @@ public class ControlActivity extends AppCompatActivity implements Lists{
                             // sets the initial value of the seekbar and percentage box
                             if(powerInit == 0){
                                 powerView.setText(powerState + "0%");
-                                prevPowerValue = inner.getString("field3");
+                                prevPowerValue = powerState;
                                 powerInit++;
                             }
                         }
                         catch (JSONException e) // catches json request errors
                         {
                             e.printStackTrace();
+                        }
+                        catch (Exception ex) // handles general exceptions
+                        {
+                            Toast.makeText(ControlActivity.this, "null value found", Toast.LENGTH_SHORT).show();
                         }
 
                     }
@@ -166,6 +185,10 @@ public class ControlActivity extends AppCompatActivity implements Lists{
                         {
                             e.printStackTrace();
                         }
+                        catch (Exception ex) // handles general exceptions
+                        {
+                            Toast.makeText(ControlActivity.this, "null value found", Toast.LENGTH_SHORT).show();
+                        }
 
                     }
                 }, new Response.ErrorListener(){
@@ -216,6 +239,10 @@ public class ControlActivity extends AppCompatActivity implements Lists{
                         {
                             e.printStackTrace();
                         }
+                        catch (Exception ex) // handles general exceptions
+                        {
+                            Toast.makeText(ControlActivity.this, "null value found", Toast.LENGTH_SHORT).show();
+                        }
 
                     }
                 }, new Response.ErrorListener(){
@@ -240,7 +267,6 @@ public class ControlActivity extends AppCompatActivity implements Lists{
 
         ToggleButton mTog = findViewById(R.id.pumpToggle); // Motor control button
         ToggleButton vTog = findViewById(R.id.valveToggle); // Valve control button
-        TextView pwrVal = findViewById(R.id.updateVolt); // power percentage
 
         if(mTog.isChecked())
             one = "1";
@@ -261,16 +287,17 @@ public class ControlActivity extends AppCompatActivity implements Lists{
         update_url = "https://api.thingspeak.com/update.json?api_key=" + mButtonWrite.get(0) +
                 "&field1=" + one + "&field2=" + two + "&field3=" +  three;
 
-        Toast.makeText(ControlActivity.this, update_url, Toast.LENGTH_SHORT).show();
-
         // used to open ThingSpeak in order to refresh the status of the buttons
         WebView updateChannel = findViewById(R.id.update);
         updateChannel.loadUrl(update_url);
+
+        // Debugging message used to show update URL
+        //Toast.makeText(ControlActivity.this, update_url, Toast.LENGTH_SHORT).show();
     }
 
     // refreshes the data when the activity is showing
-    Runnable r;
     Handler h = new Handler();
+    Runnable r;
     int delay = (int) (1000 * 1); // 1 second delay for data pull requests
 
     @Override
@@ -282,6 +309,7 @@ public class ControlActivity extends AppCompatActivity implements Lists{
                 InitializeValve();
                 InitializePump();
                 InitializePower();
+                h.postDelayed(r, delay);
             }
         }, delay);
 
