@@ -1,4 +1,4 @@
-package com.example.naffaa.tankcontrol;
+package com.tankControl.naffaa.tankcontrol;
 
 import android.content.pm.ActivityInfo;
 import android.os.Build;
@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebView;
-import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -93,10 +92,9 @@ public class ControlActivity extends AppCompatActivity implements Lists{
                         {
                             SeekBar powerSeekBar = findViewById(R.id.powerSeekBar);
                             TextView powerView = findViewById(R.id.updateVolt);
-                            TextView tSpeakPower = findViewById(R.id.sysPowerLvl);
+                            TextView tSpeakPower = findViewById(R.id.sysPowerLvl); // value stored on ThingSpeak
 
                             int prog = powerSeekBar.getProgress();
-                            String displayedProg = prog + "";
 
                             // iterate through the general object request to the JSON object that
                             // is holding our values
@@ -104,18 +102,18 @@ public class ControlActivity extends AppCompatActivity implements Lists{
                             JSONObject inner = outer.getJSONObject(0);
                             String powerState = inner.getString("field3");
 
-                            // if a null string is received, set it to an empty string instead
-                            if(powerState.contains("null")){
+                            // if a null string is received, set it to 0 instead
+                            if(powerState.contains("null") || powerState.isEmpty()) {
                                 powerState = "";
+                                tSpeakPower.setText("No value found");
                             }
-
-                            // set the textview that shows the power level stored on ThingSpeak
-                            tSpeakPower.setText("Current ThingSpeak Value: " + powerState + "0%");
+                            else
+                                tSpeakPower.setText("Current ThingSpeak Value: " + Integer.parseInt(powerState)*10 + "%");
 
                             // changes the value of the seekbar and percentage box
                             // if a different user updated the value
                             if(!powerState.equals(prevPowerValue)){
-                                powerView.setText(powerState + "0%");
+                                powerView.setText(Integer.parseInt(powerState)*10 + "%");
                                 powerSeekBar.setProgress(Integer.parseInt(powerState), true);
                                 prevPowerValue = powerState;
                             }
@@ -133,7 +131,8 @@ public class ControlActivity extends AppCompatActivity implements Lists{
                         }
                         catch (Exception ex) // handles general exceptions
                         {
-                            Toast.makeText(ControlActivity.this, "null value found", Toast.LENGTH_SHORT).show();
+                            // could display a message for general exception, not currently used
+                            //Toast.makeText(ControlActivity.this, "null value found", Toast.LENGTH_SHORT).show();
                         }
 
                     }
@@ -290,9 +289,6 @@ public class ControlActivity extends AppCompatActivity implements Lists{
         // used to open ThingSpeak in order to refresh the status of the buttons
         WebView updateChannel = findViewById(R.id.update);
         updateChannel.loadUrl(update_url);
-
-        // Debugging message used to show update URL
-        //Toast.makeText(ControlActivity.this, update_url, Toast.LENGTH_SHORT).show();
     }
 
     // refreshes the data when the activity is showing

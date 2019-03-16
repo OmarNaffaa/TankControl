@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.example.naffaa.tankcontrol"
+        applicationId "com.tankControl.naffaa.tankcontrol"
         minSdkVersion 21
         targetSdkVersion 27
         versionCode 1

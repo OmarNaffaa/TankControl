@@ -1,4 +1,4 @@
-package com.example.naffaa.tankcontrol;
+package com.tankControl.naffaa.tankcontrol;
 
 import android.content.Context;
 import android.content.Intent;
