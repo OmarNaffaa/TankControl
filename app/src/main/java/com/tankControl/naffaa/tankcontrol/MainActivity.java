@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements Lists{
 
     // URL variables of the ThingSpeak channel for the sensor data
     String sensor_read_key;
+    String sensor_channel_id;
     String sensor_server_url;
 
     @Override
@@ -50,6 +51,8 @@ public class MainActivity extends AppCompatActivity implements Lists{
 
         // Gets local data (if there is any) whenever the activity is created
         GetData("System Names", mNames);
+        GetData("Channel ID", mChannels);
+        GetData("Button Channels", mBChannels);
         GetData("Data Key", mSystems);
         GetData("Button Read", mButtonRead);
         GetData("Button Write", mButtonWrite);
@@ -92,13 +95,13 @@ public class MainActivity extends AppCompatActivity implements Lists{
                             float[] floatValues = new float[arraySize];
 
                             values[0] = inner.getString("field1"); // temperature
-                            values[1] = inner.getString("field2"); // conductivity
-                            values[2] = inner.getString("field3"); // flow rate
+                            values[1] = inner.getString("field4"); // conductivity
+                            values[2] = inner.getString("field2"); // flow rate
                             values[3] = inner.getString("field5"); // Tank 1 Water Level
-                            values[4] = inner.getString("field8"); // Tank 2 Water Level
-                            values[5] = inner.getString("field6"); // current
-                            values[6] = inner.getString("field7"); // voltage
-                            values[7] = inner.getString("field4"); // pressure
+                            values[4] = inner.getString("field8"); // Tank 2 Water Level (GONE - will be used for power bar)
+                            values[5] = inner.getString("field6"); // current (NOT CURRENTLY USED - used for pump state)
+                            values[6] = inner.getString("field7"); // voltage (NOT CURRENTLY USED - write pump button state)
+                            values[7] = inner.getString("field3"); // pressure
 
                             // attempt to parse the data from string to float
                             float errorValue = 100000;
@@ -232,13 +235,16 @@ public class MainActivity extends AppCompatActivity implements Lists{
     private void SetSystem(){
         if(mNames.isEmpty()){
             mNames.add("Default System");
+            mChannels.add("544573");
+            mBChannels.add("603121");
             mSystems.add("BAY5Y9HPFP6V3C6G");
             mButtonRead.add("RREYB0QH84HAKNIZ");
             mButtonWrite.add("M3MIFBPFS6YFA3GZ");
         }
 
-        sensor_read_key = mSystems.get(0); // get the default key
-        sensor_server_url = "https://api.thingspeak.com/channels/544573/feeds.json?api_key=" + sensor_read_key + "&results=1"; // set the URL based on the key
+        sensor_read_key = mSystems.get(0); // get the first system on the list (either default or the selected system is on top
+        sensor_channel_id = mChannels.get(0);
+        sensor_server_url = "https://api.thingspeak.com/channels/" + sensor_channel_id + "/feeds.json?api_key=" + sensor_read_key + "&results=1"; // set the URL based on the key
     }
 
     // Used to get data stored locally within the app
@@ -323,6 +329,8 @@ public class MainActivity extends AppCompatActivity implements Lists{
                 GetSensorData();
 
                 SaveData("System Names", mNames);
+                SaveData("Channel ID", mChannels);
+                SaveData("Button Channels", mBChannels);
                 SaveData("Data Key", mSystems);
                 SaveData("Button Read", mButtonRead);
                 SaveData("Button Write", mButtonWrite);

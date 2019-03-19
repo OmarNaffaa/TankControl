@@ -41,10 +41,10 @@ public class ControlActivity extends AppCompatActivity implements Lists{
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         // initialize links used to interface buttons upon activity creation
-        pump_state_url = "https://api.thingspeak.com/channels/603121/fields/1.json?api_key=" + mButtonRead.get(0) + "&results=1";
-        valve_state_url = "https://api.thingspeak.com/channels/603121/fields/2.json?api_key=" + mButtonRead.get(0) + "&results=1";
-        bar_state_url = "https://api.thingspeak.com/channels/603121/fields/3.json?api_key=" + mButtonRead.get(0) + "&results=1";
-        read_url = "https://api.thingspeak.com/channels/603121/feeds.json?api_key=" + mButtonRead.get(0) + "&results=1";
+        pump_state_url = "https://api.thingspeak.com/channels/" + mBChannels.get(0) + "/fields/1.json?api_key=" + mButtonRead.get(0) + "&results=1";
+        valve_state_url = "https://api.thingspeak.com/channels/" + mBChannels.get(0) + "/fields/2.json?api_key=" + mButtonRead.get(0) + "&results=1";
+        bar_state_url = "https://api.thingspeak.com/channels/" + mBChannels.get(0) + "/fields/3.json?api_key=" + mButtonRead.get(0) + "&results=1";
+        read_url = "https://api.thingspeak.com/channels/" + mBChannels.get(0) + "/feeds.json?api_key=" + mButtonRead.get(0) + "&results=1";
 
         // initialize the state of the pump, valve, and flow meter power
         InitializeValve();
