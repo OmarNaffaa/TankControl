@@ -19,7 +19,7 @@
     <string name="header">Drowt 2.0 Information</string>
     <string name="controls">Pump Controls</string>
     <string name="selectSystem">System Select</string>
-    <string name="pvHeader">Pump / Valve Control</string>
+    <string name="pvHeader">Pump Control</string>
     <string name="flowPwr">Pump Power</string>
     <string name="addSys">System Select</string>
 </resources>

@@ -52,9 +52,7 @@ public class MainActivity extends AppCompatActivity implements Lists{
         // Gets local data (if there is any) whenever the activity is created
         GetData("System Names", mNames);
         GetData("Channel ID", mChannels);
-        GetData("Button Channels", mBChannels);
         GetData("Data Key", mSystems);
-        GetData("Button Read", mButtonRead);
         GetData("Button Write", mButtonWrite);
 
         // Sets a system for viewing (picks a default system if none exist)
@@ -67,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements Lists{
         GetSensorData();
     }
 
-    final int arraySize = 8; // set to 8 because ThingSpeak has maximum 8 fields
+    final int arraySize = 8; // 5 data values are being sent, the other 3 are for controls
     final float HEIGHT = 36; // height of tank (Constant, hard coded in)
 
     // Retreives data from a ThingSpeak channel that contains sensor information
@@ -95,18 +93,21 @@ public class MainActivity extends AppCompatActivity implements Lists{
                             float[] floatValues = new float[arraySize];
 
                             values[0] = inner.getString("field1"); // temperature
-                            values[1] = inner.getString("field4"); // conductivity
-                            values[2] = inner.getString("field2"); // flow rate
-                            values[3] = inner.getString("field5"); // Tank 1 Water Level
-                            values[4] = inner.getString("field8"); // Tank 2 Water Level (GONE - will be used for power bar)
-                            values[5] = inner.getString("field6"); // current (NOT CURRENTLY USED - used for pump state)
-                            values[6] = inner.getString("field7"); // voltage (NOT CURRENTLY USED - write pump button state)
-                            values[7] = inner.getString("field3"); // pressure
+                            values[1] = inner.getString("field2"); // flow rate
+                            values[2] = inner.getString("field3"); // pressure
+                            values[3] = inner.getString("field4"); // conductivity
+                            values[4] = inner.getString("field5"); // Tank 1 Water Level
+
+                            values[5] = inner.getString("field6"); // Pump Read State
+                            values[6] = inner.getString("field7"); // Pump Write State
+                            values[7] = inner.getString("field8"); // Power Bar Value
 
                             // attempt to parse the data from string to float
                             float errorValue = 100000;
 
                             for(int i = 0; i < arraySize; i++){
+                                // add the retrieved values into the array for use in ControlActivity
+                                mDataPoints[i] = values[i];
 
                                 // attempt to parse string from ThingSpeak to a float
                                 try{ floatValues[i] = Float.parseFloat(values[i]); }
@@ -118,50 +119,30 @@ public class MainActivity extends AppCompatActivity implements Lists{
                             String errorString = "No Data Found";
 
                             // adds appropriate data to the arraylist
-
+                            // temperature
                             if(floatValues[0] != errorValue) mDataValues.add(df.format(floatValues[0]) + " \u00b0C");
                             else mDataValues.add(errorString);
 
-                            if(floatValues[1] != errorValue) mDataValues.add(df.format(floatValues[1]) + " S");
+                            // flow rate
+                            if(floatValues[1] != errorValue) mDataValues.add(df.format(floatValues[1]) + " L / min");
                             else mDataValues.add(errorString);
 
-                            if(floatValues[2] != errorValue) mDataValues.add(df.format(floatValues[2]) + " L / min");
+                            // pressure
+                            if(floatValues[2] != errorValue) mDataValues.add(df.format(floatValues[2]) + " psi");
                             else mDataValues.add(errorString);
 
-                            if(floatValues[7] != errorValue) mDataValues.add(df.format(floatValues[7]) + " psi");
+                            // conductivity
+                            if(floatValues[3] != errorValue) mDataValues.add(df.format(floatValues[3]) + " S");
                             else mDataValues.add(errorString);
 
-
-                            if(floatValues[3] != errorValue){
-                                String tankOnePcntFilled = df.format(floatValues[3]) + " % filled";
-                                String tankOneWaterLvl = df.format((floatValues[3] / 100) * HEIGHT) + " cm";
+                            // tank one information
+                            if(floatValues[4] != errorValue){
+                                String tankOnePcntFilled = df.format(floatValues[4]) + " % filled";
+                                String tankOneWaterLvl = df.format((floatValues[4] / 100) * HEIGHT) + " cm";
 
                                 mDataValues.add(tankOneWaterLvl + "\n" + tankOnePcntFilled);
                             }
                             else mDataValues.add(errorString);
-
-                            if(floatValues[4] != errorValue){
-                                String tankTwoPcntFilled = df.format(floatValues[4]) + " % filled";
-                                String tankTwoWaterLvl = df.format((floatValues[4] / 100) * HEIGHT) + " cm";
-
-                                mDataValues.add(tankTwoWaterLvl + "\n" + tankTwoPcntFilled);
-                            }
-                            else mDataValues.add(errorString);
-
-                            if(floatValues[3] != errorValue && floatValues[4] != errorValue) mDataValues.add(df.format((floatValues[3] + floatValues[4]) / 2) + " % full");
-                            else mDataValues.add(errorString);
-
-                            if(floatValues[5] != errorValue && floatValues[6] != errorValue) mDataValues.add(df.format(floatValues[5] * floatValues[6]) + " W");
-                            else mDataValues.add(errorString);
-
-                            if(floatValues[5] != errorValue) mDataValues.add(floatValues[5] + " A");
-                            else mDataValues.add(errorString);
-
-                            if(floatValues[6] != errorValue) mDataValues.add(floatValues[6] + " V");
-                            else mDataValues.add(errorString);
-
-                            // setting the height of the tank
-                            mDataValues.add(4, 36 + " cm");
 
                             InitializeRecyclerView(mDataValues);
 
@@ -217,29 +198,20 @@ public class MainActivity extends AppCompatActivity implements Lists{
     private void InitializeTitle(){
 
         titles.add("Temperature");
-        titles.add("Conductivity");
         titles.add("Flow Rate");
         titles.add("Pressure");
-        titles.add("Height of Tank");
+        titles.add("Conductivity");
         titles.add("Tank One\nInformation");
-        titles.add("Tank Two\nInformation");
-        titles.add("Used Capacity");
-        titles.add("Power Usage");
-        titles.add("Current");
-        titles.add("Voltage");
-
     }
 
     // Sets the system based on what the user selects, which will appear at the top of the list of
     // systems (the zeroth value in the mSystems ArrayList)
     private void SetSystem(){
         if(mNames.isEmpty()){
-            mNames.add("Default System");
-            mChannels.add("544573");
-            mBChannels.add("603121");
-            mSystems.add("BAY5Y9HPFP6V3C6G");
-            mButtonRead.add("RREYB0QH84HAKNIZ");
-            mButtonWrite.add("M3MIFBPFS6YFA3GZ");
+            mNames.add("DWTS 1");
+            mChannels.add("627570");
+            mSystems.add("YBBRAU82M3CRGA8S");
+            mButtonWrite.add("9N11M3HYQVIS0QIH");
         }
 
         sensor_read_key = mSystems.get(0); // get the first system on the list (either default or the selected system is on top
@@ -330,9 +302,7 @@ public class MainActivity extends AppCompatActivity implements Lists{
 
                 SaveData("System Names", mNames);
                 SaveData("Channel ID", mChannels);
-                SaveData("Button Channels", mBChannels);
                 SaveData("Data Key", mSystems);
-                SaveData("Button Read", mButtonRead);
                 SaveData("Button Write", mButtonWrite);
 
                 SetSystem();
@@ -358,8 +328,8 @@ public class MainActivity extends AppCompatActivity implements Lists{
         // is pressed ensures the double appearance of the lists does not happen since only the
         // data that was saved before quitting would be added to the lists when the app is reopened
         mNames.clear();
+        mChannels.clear();
         mSystems.clear();
-        mButtonRead.clear();
         mButtonWrite.clear();
 
         super.onBackPressed();

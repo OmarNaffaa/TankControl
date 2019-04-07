@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#388E3C</color>
+    <color name="colorPrimary">#6fe275</color>
     <color name="colorPrimaryDark">#28502E</color>
     <color name="colorAccent">#f5ca54</color>
     <color name="cardBackground">#616161</color>
     <color name="dataCardBackground">#757575</color>
-    <color name="cardText">#FFFFFF</color>
+    <color name="cardText">#ffffff</color>
 </resources>

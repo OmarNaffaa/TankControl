@@ -96,9 +96,7 @@ public class SystemSelect extends AppCompatActivity implements Lists{
 
                 mNames.remove(index);
                 mChannels.remove(index);
-                mBChannels.remove(index);
                 mSystems.remove(index);
-                mButtonRead.remove(index);
                 mButtonWrite.remove(index);
                 RefreshSystems();
             }
@@ -135,9 +133,7 @@ public class SystemSelect extends AppCompatActivity implements Lists{
             // Save added systems locally
             SaveData("System Names", mNames);
             SaveData("Channel ID", mChannels);
-            SaveData("Button Channels", mBChannels);
             SaveData("Data Key", mSystems);
-            SaveData("Button Read", mButtonRead);
             SaveData("Button Write", mButtonWrite);
         }
 
@@ -169,16 +165,8 @@ public class SystemSelect extends AppCompatActivity implements Lists{
                 mChannels.remove(mChannels.size() - 1);
             }
 
-            while(mNames.size() != mBChannels.size()){
-                mBChannels.remove(mBChannels.size() - 1);
-            }
-
             while(mNames.size() != mSystems.size()){
                 mSystems.remove(mSystems.size() - 1);
-            }
-
-            while(mNames.size() != mButtonRead.size()){
-                mButtonRead.remove(mButtonRead.size() - 1);
             }
 
             while(mNames.size() != mButtonWrite.size()){
@@ -222,7 +210,7 @@ public class SystemSelect extends AppCompatActivity implements Lists{
                     // Otherwise, add the entered key and move to the next method to get the button read key
                 } else {
                     mChannels.add(dialogInputCID.getText().toString());
-                    GetButtonChannelID();
+                    GetDataKey();
                 }
             }
         });
@@ -235,42 +223,6 @@ public class SystemSelect extends AppCompatActivity implements Lists{
         });
 
         getChannel.show();
-    }
-
-    // Get the channel ID for the system buttons
-    private void GetButtonChannelID(){
-        final AlertDialog.Builder getBChannel = new AlertDialog.Builder(this);
-        final EditText dialogInputBCID = new EditText(this);
-
-        getBChannel.setTitle("Enter a 6-Character Button Channel ID"); // set the title of the dialog box
-        dialogInputBCID.setInputType(InputType.TYPE_CLASS_TEXT); // set input type for dialog
-        getBChannel.setView(dialogInputBCID);
-
-        // Perform operations within the "onClick" method if the user clicks the "OK" option
-        getBChannel.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                // If an invalid key is entered, notify the user and allow them to try again
-                if(dialogInputBCID.getText().toString().length() != 6 || dialogInputBCID.getText().toString().trim().equals("")) {
-                    GetButtonChannelID();
-                    ShowDialog();
-
-                    // Otherwise, add the entered key and move to the next method to get the button read key
-                } else {
-                    mBChannels.add(dialogInputBCID.getText().toString());
-                    GetDataKey();
-                }
-            }
-        });
-        // Cancel the pop-up window if the user clicks the "Cancel" option
-        getBChannel.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.cancel();
-            }
-        });
-
-        getBChannel.show();
     }
 
     // After GetChannelID method is successful, this method is called to get the channel ID
@@ -294,7 +246,7 @@ public class SystemSelect extends AppCompatActivity implements Lists{
                 // Otherwise, add the entered key and move to the next method to get the button read key
                 } else {
                     mSystems.add(dialogInput.getText().toString());
-                    GetButtonRead();
+                    GetButtonWrite();
                 }
             }
         });
@@ -307,41 +259,6 @@ public class SystemSelect extends AppCompatActivity implements Lists{
         });
 
         getData.show();
-    }
-
-    // After the GetDataKey method is successful, this method is called to get the button read key
-    private void GetButtonRead(){
-        // Same logic used as the GetDataKey method, except once a valid button read key
-        // has been entered the GetButtonWrite method will be called to get the button write key
-
-        final AlertDialog.Builder getButtonRead = new AlertDialog.Builder(this);
-        final EditText dialogInput2 = new EditText(this);
-
-        getButtonRead.setTitle("Enter a 16-Character Button Read Key");
-        dialogInput2.setInputType(InputType.TYPE_CLASS_TEXT); // set input type for dialog
-        getButtonRead.setView(dialogInput2);
-
-        // set up the positive and negative buttons for the button read key dialog
-        getButtonRead.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                if(dialogInput2.getText().toString().length() != 16 || dialogInput2.getText().toString().trim().equals("")) {
-                    GetButtonRead();
-                    ShowDialog();
-                } else {
-                    mButtonRead.add(dialogInput2.getText().toString());
-                    GetButtonWrite();
-                }
-            }
-        });
-        getButtonRead.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.cancel();
-            }
-        });
-
-        getButtonRead.show();
     }
 
     // After GetButtonRead is successful, this method is caleld to get the button write key
@@ -376,9 +293,7 @@ public class SystemSelect extends AppCompatActivity implements Lists{
                     // Save added systems locally
                     SaveData("System Names", mNames);
                     SaveData("Channel ID", mChannels);
-                    SaveData("Button Channels", mBChannels);
                     SaveData("Data Key", mSystems);
-                    SaveData("Button Read", mButtonRead);
                     SaveData("Button Write", mButtonWrite);
 
                     // refresh the feed after making changes with this method
@@ -415,25 +330,19 @@ public class SystemSelect extends AppCompatActivity implements Lists{
                 // store values to be moved to front of array in temp variables
                 tempName = mNames.get(i);
                 tempChannel = mChannels.get(i);
-                tempBChannel = mBChannels.get(i);
                 tempDataKey = mSystems.get(i);
-                tempButtonRead = mButtonRead.get(i);
                 tempButtonWrite = mButtonWrite.get(i);
 
                 // remove the values from its existing position to the front of the arraylist
                 // in order to set the system keys in other methods
                 mNames.remove(i);
                 mChannels.remove(i);
-                mBChannels.remove(i);
                 mSystems.remove(i);
-                mButtonRead.remove(i);
                 mButtonWrite.remove(i);
 
                 mNames.add(0, tempName);
                 mChannels.add(0, tempChannel);
-                mBChannels.add(0, tempBChannel);
                 mSystems.add(0, tempDataKey);
-                mButtonRead.add(0, tempButtonRead);
                 mButtonWrite.add(0, tempButtonWrite);
 
                 found = true;
@@ -482,26 +391,12 @@ public class SystemSelect extends AppCompatActivity implements Lists{
         channelKey.setText("Channel ID:\n     " + mChannels.get(indexOfSystem));
         layout.addView(channelKey);
 
-        final TextView bChannelKey = new TextView(this); // set the data key
-        bChannelKey.setTextSize(20);
-        bChannelKey.setTextColor(getResources().getColor(R.color.cardText));
-        bChannelKey.setPadding(75, 50, 50, 50);
-        bChannelKey.setText("Channel ID:\n     " + mBChannels.get(indexOfSystem));
-        layout.addView(bChannelKey);
-
         final TextView dataKey = new TextView(this); // set the data key
         dataKey.setTextSize(20);
         dataKey.setTextColor(getResources().getColor(R.color.cardText));
         dataKey.setPadding(75, 50, 50, 50);
         dataKey.setText("Data Key:\n     " + mSystems.get(indexOfSystem));
         layout.addView(dataKey);
-
-        final TextView buttonRead = new TextView(this); // set the button read key
-        buttonRead.setTextSize(20);
-        buttonRead.setTextColor(getResources().getColor(R.color.cardText));
-        buttonRead.setPadding(75, 50, 50, 50);
-        buttonRead.setText("Button Read Key:\n     " + mButtonRead.get(indexOfSystem));
-        layout.addView(buttonRead);
 
         final TextView buttonWrite = new TextView(this); // set the button write key
         buttonWrite.setTextSize(20);
