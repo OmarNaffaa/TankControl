@@ -8,11 +8,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebView;
-import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -170,7 +168,12 @@ public class ControlActivity extends AppCompatActivity implements Lists{
 
                             mDataPoints[4] = waterHeight; // update the array from ControlActivity since Main is paused
 
-                            double wHeight = Double.parseDouble(waterHeight);
+                            double wHeight;
+                            try {
+                                wHeight = Double.parseDouble(mDataPoints[4]);
+                            } catch(Exception e) {
+                                wHeight = 0;
+                            }
 
                             if(systemState.contains("1")) { // if the pump is on keep it on
                                 pState.setText("The pump is currently ON");
@@ -211,7 +214,13 @@ public class ControlActivity extends AppCompatActivity implements Lists{
     }
 
     private void ResetChannel(){
-        double wHeight = Double.parseDouble(mDataPoints[4]);
+        double wHeight;
+        try {
+            wHeight = Double.parseDouble(mDataPoints[4]);
+        } catch(Exception e) {
+            wHeight = 0;
+        }
+
 
         if(wHeight >= 75.0) // send a 0 once the tank is full
             PumpOff();
